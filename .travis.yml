@@ -16,9 +16,9 @@ install:
   # install scripts for testing code quality
   - pip install pep8 pyflakes --use-mirrors
   # install the app itself
-  #- pip install -q -e . --use-mirrors
+  - pip install -q -e . --use-mirrors
 before_script:
   - "pep8 --exclude=migrations --ignore=E501,E225 src"
   - pyflakes -x W src
 script:
-  - python setup.py test
+  - python quicktest.py test
