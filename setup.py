@@ -22,4 +22,12 @@ setup(
     packages=['djmp',],
     include_package_data=True,
     zip_safe=False,
+    install_requires=[
+        'Django>=1.6.10',
+        'MapProxy==1.8.0',
+        'PyYAML>=3.10',
+        'django-tastypie>=0.12.1',
+        'Shapely>=1.5.9',
+        'psutil>=3.0.1'
+    ]
 )

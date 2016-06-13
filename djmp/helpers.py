@@ -42,7 +42,7 @@ def generate_confs(tileset, ignore_warnings=True, renderd=False):
         }))
     
 
-    log.debug('cache to generate: {}'.format(get_tileset_filename(tileset.name))
+    log.debug('cache to generate: {}'.format(get_tileset_filename(tileset.name)))
 
     server_service_type = u_to_str(tileset.server_service_type)
 
