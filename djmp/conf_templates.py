@@ -1,10 +1,9 @@
 import json
 
-from django.conf import settings
+from .settings import CACHE_CONFIG
 
 mapproxy_conf = """
-    {
-      "services":{
+    {"services":{
         "wms":{
           "on_source_errors":"raise",
           "image_formats": ["image/png"]
@@ -12,8 +11,7 @@ mapproxy_conf = """
       },
       "layers":[
         {
-          "name":"{layer_name}",
-          "title":"{layer_title}",
+          "name": "%s",
           "sources":[
             "tileset_cache"
           ]
@@ -27,12 +25,12 @@ mapproxy_conf = """
           "sources":[
             "tileset_source"
           ],
-          "cache":""" + json.loads(settings.CACHE_CONFIG) +"""
+          "cache":""" + json.dumps(CACHE_CONFIG) +"""
         }
       },
       "sources":{
         "tileset_source":{
-          "type": {tileset_source_type}
+          "type": "%s"
         }
       },
       "grids":{
@@ -53,7 +51,7 @@ seed_conf = """
     {
       "coverages": {
         "tileset_geom": {
-          "bbox": {seed_bbox},
+          "bbox": %s,
           "srs": "EPSG:3857"
         }
       },
@@ -67,11 +65,17 @@ seed_conf = """
             "tileset_cache"
           ],
           "levels": {
-            "from": {seed_zoom_start},
-            "to": {seed_zoom_end}
+            "from": %s,
+            "to": %s
           },
           "coverages": ["tileset_geom"]
         }
       }
     }
     """
+
+def get_mapproxy_conf(layer_name, tileset_source_type):
+  return mapproxy_conf % (layer_name, tileset_source_type)
+
+def get_seed_conf(bbox, zoom_start, zoom_stop):
+  return seed_conf % (bbox, zoom_start, zoom_stop)

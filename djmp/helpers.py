@@ -1,4 +1,4 @@
-from django.conf import settings
+
 from mapproxy.seed.seeder import seed
 from mapproxy.seed.config import SeedingConfiguration, SeedConfigurationError, ConfigurationError
 from mapproxy.seed.spec import validate_seed_conf
@@ -7,6 +7,8 @@ from mapproxy.config.loader import ProxyConfiguration
 from mapproxy.seed import seeder
 from mapproxy.seed import util
 from django.utils.text import slugify
+
+from pyproj import Proj, transform
 
 from datetime import datetime
 import base64
@@ -20,7 +22,8 @@ import psutil
 import logging
 
 from .settings import CACHE_CONFIG
-from .conf_templates import mapproxy_conf, seed_conf
+from .conf_templates import get_mapproxy_conf, get_seed_conf
+
 
 log = logging.getLogger('djmapproxy')
 
@@ -30,20 +33,13 @@ def generate_confs(tileset, ignore_warnings=True, renderd=False):
     Takes a Tileset object and returns mapproxy and seed config files
     """
 
-    mapproxy_conf = yaml.safe_load(mapproxy_conf.format({
-        'layer_name': tileset.layer_name,
-        'layer_title': tileset.layer_title,
-        'tileset_source_type': u_to_str(tileset.server_service_type)
-        }))
+    mapproxy_conf_json = get_mapproxy_conf(tileset.layer_name, tileset.server_service_type)
+    mapproxy_conf = yaml.safe_load(mapproxy_conf_json)
 
-    seed_conf = yaml.safe_load(seed_conf.format({
-        'seed_zoom_start': tileset.layer_zoom_start,
-        'seed_zoom_stop': tileset.layer_zoom_stop
-        }))
+    bbox = bbox_to_3857(tileset.bbox_x0, tileset.bbox_y0, tileset.bbox_x1, tileset.bbox_y1)
+    seed_conf_json = get_seed_conf(bbox, tileset.layer_zoom_start, tileset.layer_zoom_stop)
+    seed_conf = yaml.safe_load(seed_conf_json)
     
-
-    log.debug('cache to generate: {}'.format(get_tileset_filename(tileset.name)))
-
     server_service_type = u_to_str(tileset.server_service_type)
 
     if server_service_type == 'wms':
@@ -55,21 +51,10 @@ def generate_confs(tileset, ignore_warnings=True, renderd=False):
     elif server_service_type == 'tile':
         mapproxy_conf['sources']['tileset_source']['url'] = u_to_str(tileset.server_url)
 
-    mapproxy_conf['layers'][0]['name'] = u_to_str(tileset.layer_name)
-    mapproxy_conf['layers'][0]['title'] = u_to_str(tileset.layer_name)
-    mapproxy_conf['caches']['tileset_cache']['cache']['filename'] = get_tileset_filename(tileset.name, 'generating')
-    mapproxy_conf['caches']['tileset_cache']['cache']['table_name'] = str(slugify(tileset.name).replace('-', '_'))
-
     if tileset.layer_zoom_start > tileset.layer_zoom_stop:
         raise ConfigurationError('invalid configuration - zoom start is greater than zoom stop')
     seed_conf['seeds']['tileset_seed']['levels']['from'] = tileset.layer_zoom_start
     seed_conf['seeds']['tileset_seed']['levels']['to'] = tileset.layer_zoom_stop
-    
-    # any specified refresh before for gpkg will result in regeneration of the tile set
-    seed_conf['seeds']['tileset_seed']['refresh_before']['minutes'] = 0
-    
-    bbox = [tileset.x0, tileset.y0, tileset.x1, tileset.y1]
-    seed_conf['coverages']['tileset_geom']['bbox'] = yaml.safe_load(bbox)
 
     if tileset.server_username and tileset.server_password:
 
@@ -98,15 +83,21 @@ def generate_confs(tileset, ignore_warnings=True, renderd=False):
     return cf, seed_cf
 
 
-"""
-example settings file
-TILEBUNDLER_CONFIG = {
-    'tileset_dir': '/var/lib/gpkg'
-}
-"""
+def bbox_to_3857(bbox_x0, bbox_y0, bbox_x1, bbox_y1):
+    inProj = Proj(init='epsg:4326')
+    outProj = Proj(init='epsg:3857')
+
+    sw = transform(inProj, outProj, bbox_x0, bbox_y0)
+    ne = transform(inProj, outProj, bbox_x1, bbox_y1)
+
+    return [sw[0], sw[1], ne[0], ne[1]]
+
 def get_tileset_dir():
-    conf = getattr(settings, 'CACHE_CONFIG', {})
-    return conf.get('directory', './')
+    conf = CACHE_CONFIG
+    folder = conf.get('directory', './')
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    return folder
 
 
 def get_tileset_filename(tileset_name, extension='gpkg'):
@@ -264,10 +255,10 @@ def seed_process_target(tileset_id, tileset_name, tasks, progress_logger):
 
     # now that we have generated the new gpkg file, backup the last one, then rename
     # the _generating one to the main name
-    if os.path.isfile(get_tileset_filename(tileset_name)):
-        millis = int(round(time.time() * 1000))
-        os.rename(get_tileset_filename(tileset_name), '{}_{}'.format(get_tileset_filename(tileset_name), millis))
-    os.rename(get_tileset_filename(tileset_name, 'generating'), get_tileset_filename(tileset_name))
+    # if os.path.isfile(get_tileset_filename(tileset_name)):
+    #     millis = int(round(time.time() * 1000))
+    #     os.rename(get_tileset_filename(tileset_name), '{}_{}'.format(get_tileset_filename(tileset_name), millis))
+    # os.rename(get_tileset_filename(tileset_name, 'generating'), get_tileset_filename(tileset_name))
     remove_lock_file(tileset_id)
 
 
