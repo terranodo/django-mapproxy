@@ -12,6 +12,7 @@ mapproxy_conf = """
       "layers":[
         {
           "name": "%s",
+          "title": "%s",
           "sources":[
             "tileset_cache"
           ]
@@ -74,8 +75,8 @@ seed_conf = """
     }
     """
 
-def get_mapproxy_conf(layer_name, tileset_source_type):
-  return mapproxy_conf % (layer_name, tileset_source_type)
+def get_mapproxy_conf(layer_name, layer_title, tileset_source_type):
+  return mapproxy_conf % (layer_name, layer_title, tileset_source_type)
 
 def get_seed_conf(bbox, zoom_start, zoom_stop):
   return seed_conf % (bbox, zoom_start, zoom_stop)

@@ -26,10 +26,10 @@ class Tileset(models.Model):
     layer_zoom_stop = models.IntegerField()
 
     # area
-    bbox_x0 = models.DecimalField(max_digits=19, decimal_places=10, default=-180)
-    bbox_x1 = models.DecimalField(max_digits=19, decimal_places=10, default=180)
-    bbox_y0 = models.DecimalField(max_digits=19, decimal_places=10, default=-89.9)
-    bbox_y1 = models.DecimalField(max_digits=19, decimal_places=10, default=89.9)
+    bbox_x0 = models.DecimalField(max_digits=19, decimal_places=15, default=-180)
+    bbox_x1 = models.DecimalField(max_digits=19, decimal_places=15, default=180)
+    bbox_y0 = models.DecimalField(max_digits=19, decimal_places=15, default=-89.9)
+    bbox_y1 = models.DecimalField(max_digits=19, decimal_places=15, default=89.9)
 
     def __unicode__(self):
         return self.name

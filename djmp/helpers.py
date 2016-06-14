@@ -3,7 +3,7 @@ from mapproxy.seed.seeder import seed
 from mapproxy.seed.config import SeedingConfiguration, SeedConfigurationError, ConfigurationError
 from mapproxy.seed.spec import validate_seed_conf
 from mapproxy.config.loader import ProxyConfiguration
-#from mapproxy.config.spec import validate_mapproxy_conf
+from mapproxy.config.spec import validate_mapproxy_conf
 from mapproxy.seed import seeder
 from mapproxy.seed import util
 from django.utils.text import slugify
@@ -33,7 +33,7 @@ def generate_confs(tileset, ignore_warnings=True, renderd=False):
     Takes a Tileset object and returns mapproxy and seed config files
     """
 
-    mapproxy_conf_json = get_mapproxy_conf(tileset.layer_name, tileset.server_service_type)
+    mapproxy_conf_json = get_mapproxy_conf(tileset.layer_name, tileset.layer_name, tileset.server_service_type)
     mapproxy_conf = yaml.safe_load(mapproxy_conf_json)
 
     bbox = bbox_to_3857(tileset.bbox_x0, tileset.bbox_y0, tileset.bbox_x1, tileset.bbox_y1)
@@ -64,13 +64,13 @@ def generate_confs(tileset, ignore_warnings=True, renderd=False):
         mapproxy_conf['sources']['tileset_source']['http']['headers']['Authorization'] = 'Basic {}'.format(encoded)
         mapproxy_conf['sources']['tileset_source']['http']['ssl_no_cert_checks'] = True
 
-    """
+    
     errors, informal_only = validate_mapproxy_conf(mapproxy_conf)
     for error in errors:
         print error
     if not informal_only or (errors and not ignore_warnings):
         raise ConfigurationError('invalid configuration - {}'.format(', '.join(errors)))
-    """
+
     cf = ProxyConfiguration(mapproxy_conf, seed=seed, renderd=renderd)
 
     errors, informal_only = validate_seed_conf(seed_conf)
