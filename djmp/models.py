@@ -61,7 +61,7 @@ class Tileset(models.Model):
     def stop(self):
         log.debug('tileset.stop')
         res = {'status': 'not in progress'}
-        pid_str = helpers.get_pid_from_lock_file(self.id)
+        pid_str = helpers.get_pid_from_lock_file(self)
         process = helpers.get_process_from_pid(pid_str)
         if process:
             log.debug('tileset.stop, will stop, pid: {}').format(pid_str)
@@ -83,7 +83,7 @@ class Tileset(models.Model):
 
     def seed(self):
         
-        lock_file = helpers.get_lock_file(self.id)
+        lock_file = helpers.get_lock_file(self)
         if lock_file:
             log.debug('generating tileset')
             try:
@@ -93,14 +93,14 @@ class Tileset(models.Model):
             except (SeedConfigurationError, ConfigurationError) as e:
                 log.error('Something went wrong when generating.. removing lock file')
 
-                helpers.remove_lock_file(self.id)
+                helpers.remove_lock_file(self)
                 res = {'status': 'unable to start',
                        'error': e.message}
             finally:
                 lock_file.flush()
                 lock_file.close()
         else:
-            log.debug('tileset.generate, will NOT generate. already running, pid: {}'.format(helpers.get_pid_from_lock_file(self.id)))
+            log.debug('tileset.generate, will NOT generate. already running, pid: {}'.format(helpers.get_pid_from_lock_file(self)))
             res = {'status': 'already started'}
 
         return res

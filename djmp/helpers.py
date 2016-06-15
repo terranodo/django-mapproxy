@@ -19,7 +19,6 @@ import multiprocessing
 import psutil
 import logging
 
-from .settings import CACHE_CONFIG
 from .conf_templates import get_mapproxy_conf, get_seed_conf, u_to_str
 
 
@@ -61,7 +60,6 @@ def generate_confs(tileset, ignore_warnings=True, renderd=False):
         mapproxy_conf['sources']['tileset_source']['http']['headers']['Authorization'] = 'Basic {}'.format(encoded)
         mapproxy_conf['sources']['tileset_source']['http']['ssl_no_cert_checks'] = True
 
-    
     errors, informal_only = validate_mapproxy_conf(mapproxy_conf)
     if not informal_only or (errors and not ignore_warnings):
         raise ConfigurationError('invalid configuration - {}'.format(', '.join(errors)))
@@ -75,24 +73,23 @@ def generate_confs(tileset, ignore_warnings=True, renderd=False):
 
     return cf, seed_cf
 
-def get_tileset_dir():
-    conf = CACHE_CONFIG
-    folder = conf.get('directory', './')
+def get_tileset_dir(tileset):
+    folder = tileset.directory
     if not os.path.exists(folder):
         os.makedirs(folder)
     return folder
 
 
-def get_tileset_filename(tileset_name, extension='gpkg'):
-    return '{}/{}.{}'.format(get_tileset_dir(), tileset_name, extension)
+def get_tileset_filename(tileset, extension='gpkg'):
+    return '{}/{}.{}'.format(get_tileset_dir(tileset), tileset.name, extension)
 
 
-def get_lock_filename(tileset_id):
-    return '{}/generate_tileset_{}.lck'.format(get_tileset_dir(), tileset_id)
+def get_lock_filename(tileset):
+    return '{}/generate_tileset_{}.lck'.format(get_tileset_dir(tileset), tileset.id)
 
 
 def update_tileset_stats(tileset):
-    tileset_filename = get_tileset_filename(tileset.name)
+    tileset_filename = get_tileset_filename(tileset)
     if os.path.isfile(tileset_filename):
         stat = os.stat(tileset_filename)
         tileset.created_at = datetime.fromtimestamp(stat.st_ctime)
@@ -126,7 +123,7 @@ def get_status(tileset):
 
     # generate status for already existing tileset
     # if there is a .gpkg file on disk, get the size and time last updated
-    tileset_filename = get_tileset_filename(tileset.name)
+    tileset_filename = get_tileset_filename(tileset)
     if os.path.isfile(tileset_filename):
         res['current']['status'] = 'ready'
         # get the size and time last updated for the tileset
@@ -143,7 +140,7 @@ def get_status(tileset):
         if process:
             # if tileset generation is in progress
             res['pending']['status'] = 'in progress'
-            progress_log_filename = get_tileset_filename(tileset.name, 'progress_log')
+            progress_log_filename = get_tileset_filename(tileset, 'progress_log')
             if os.path.isfile(progress_log_filename):
                 with open(progress_log_filename, 'r') as f:
                     lines = f.read().replace('\r', '\n')
@@ -205,22 +202,22 @@ def seed_process_spawn(tileset):
 
     # if there is an old _generating one around, back it up
     backup_millis = int(round(time.time() * 1000))
-    if os.path.isfile(get_tileset_filename(tileset.name, 'generating')):
-        os.rename(get_tileset_filename(tileset.name, 'generating'), '{}_{}'.format(get_tileset_filename(tileset.name, 'generating'), backup_millis))
+    if os.path.isfile(get_tileset_filename(tileset, 'generating')):
+        os.rename(get_tileset_filename(tileset, 'generating'), '{}_{}'.format(get_tileset_filename(tileset, 'generating'), backup_millis))
 
     # if there is an old progress_log around, back it up
-    if os.path.isfile(get_tileset_filename(tileset.name, 'progress_log')):
-        os.rename(get_tileset_filename(tileset.name, 'progress_log'), '{}_{}'.format(get_tileset_filename(tileset.name, 'generating'), backup_millis))
+    if os.path.isfile(get_tileset_filename(tileset, 'progress_log')):
+        os.rename(get_tileset_filename(tileset, 'progress_log'), '{}_{}'.format(get_tileset_filename(tileset, 'generating'), backup_millis))
 
     # generate the new gpkg as name.generating file
-    progress_log_filename = get_tileset_filename(tileset.name, 'progress_log')
+    progress_log_filename = get_tileset_filename(tileset, 'progress_log')
     out = open(progress_log_filename, 'w+')
     progress_logger = util.ProgressLog(out=out, verbose=True, silent=False)
     tasks = seed_conf.seeds(['tileset_seed'])
     # launch the task using another process
-    process = multiprocessing.Process(target=seed_process_target, args=(tileset.id, tileset.name, tasks, progress_logger))
+    process = multiprocessing.Process(target=seed_process_target, args=(tileset, tasks, progress_logger))
     pid = None
-    if 'preparing_to_start' == get_pid_from_lock_file(tileset.id):
+    if 'preparing_to_start' == get_pid_from_lock_file(tileset):
         process.start()
         pid = process.pid
     else:
@@ -228,8 +225,8 @@ def seed_process_spawn(tileset):
     return pid
 
 
-def seed_process_target(tileset_id, tileset_name, tasks, progress_logger):
-    print '----[ start seeding. tileset {}'.format(tileset_id)
+def seed_process_target(tileset, tasks, progress_logger):
+    print '----[ start seeding. tileset {}'.format(tileset.id)
     seeder.seed(tasks=tasks, progress_logger=progress_logger)
 
     # now that we have generated the new gpkg file, backup the last one, then rename
@@ -238,15 +235,15 @@ def seed_process_target(tileset_id, tileset_name, tasks, progress_logger):
     #     millis = int(round(time.time() * 1000))
     #     os.rename(get_tileset_filename(tileset_name), '{}_{}'.format(get_tileset_filename(tileset_name), millis))
     # os.rename(get_tileset_filename(tileset_name, 'generating'), get_tileset_filename(tileset_name))
-    remove_lock_file(tileset_id)
+    remove_lock_file(tileset.id)
 
 
-def get_lock_file(tileset_id):
+def get_lock_file(tileset):
     flags = os.O_CREAT | os.O_EXCL | os.O_WRONLY
     lock_file = None
 
     try:
-        file_handle = os.open(get_lock_filename(tileset_id), flags)
+        file_handle = os.open(get_lock_filename(tileset), flags)
     except OSError as e:
         if e.errno == errno.EEXIST:
             # Failed, file already exists.
@@ -262,18 +259,18 @@ def get_lock_file(tileset_id):
     return lock_file
 
 
-def remove_lock_file(tileset_id):
+def remove_lock_file(tileset):
     try:
-        os.remove(get_lock_filename(tileset_id))
+        os.remove(get_lock_filename(tileset))
     except OSError as e:
         # Error removing lock file
         print '--- There was a problem removing the lock file. Something: {}'.format(e.errno)
         pass
 
 
-def get_pid_from_lock_file(tileset_id):
+def get_pid_from_lock_file(tileset):
     pid = None
-    name = get_lock_filename(tileset_id)
+    name = get_lock_filename(tileset)
     if os.path.isfile(name):
         with open(name, 'r') as lock_file:
             lines = lock_file.readlines()
