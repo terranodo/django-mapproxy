@@ -5,7 +5,21 @@ from django.conf import settings
 from mapproxy.seed.config import SeedConfigurationError, ConfigurationError
 import helpers
 
+from .settings import FILE_CACHE_DIRECTORY
+
 log = logging.getLogger('djmapproxy')
+
+CACHE_TYPES = [
+    ['file', 'file'],
+    #['mbtiles','mbtiles'],
+    #['sqllite', 'sqllite'],
+    ['gpkg', 'gpkg']
+]
+
+DIR_LAYOUTS = [
+    ['tms', 'tms'],
+    ['tc', 'TileCache']
+]
 
 class Tileset(models.Model):
 
@@ -31,6 +45,15 @@ class Tileset(models.Model):
     bbox_y0 = models.DecimalField(max_digits=19, decimal_places=15, default=-89.9)
     bbox_y1 = models.DecimalField(max_digits=19, decimal_places=15, default=89.9)
 
+    # cache
+    cache_type = models.CharField(max_length=10, choices=CACHE_TYPES)
+    # file cache params
+    directory_layout = models.CharField(max_length=20, choices=DIR_LAYOUTS, blank=True, null=True)
+    directory = models.CharField(max_length=256, default=FILE_CACHE_DIRECTORY, blank=True, null=True)
+    # gpkg cache params
+    filename = models.CharField(max_length=256, blank=True, null=True)
+    table_name = models.CharField(max_length=128, blank=True, null=True)
+
     def __unicode__(self):
         return self.name
 
@@ -53,7 +76,7 @@ class Tileset(models.Model):
                 # TODO: prevent it from starting!
                 log.debug('process not running but may be started shortly')
             elif helpers.is_int_str(pid_str):
-                log.debug('tileset.stop, process not running but cleaned lck file')
+                log.debug('tileset.stop, process not running but cleaned lock file')
 
         helpers.remove_lock_file(self.id)
         return res

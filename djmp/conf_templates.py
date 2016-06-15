@@ -1,5 +1,7 @@
 import json
 
+from pyproj import Proj, transform
+
 from .settings import CACHE_CONFIG
 
 mapproxy_conf = """
@@ -75,8 +77,26 @@ seed_conf = """
     }
     """
 
-def get_mapproxy_conf(layer_name, layer_title, tileset_source_type):
-  return mapproxy_conf % (layer_name, layer_title, tileset_source_type)
+def get_mapproxy_conf(tileset):
+  return mapproxy_conf % (
+    u_to_str(tileset.layer_name),
+    u_to_str(tileset.layer_name),
+    u_to_str(tileset.server_service_type)
+    )
 
-def get_seed_conf(bbox, zoom_start, zoom_stop):
-  return seed_conf % (bbox, zoom_start, zoom_stop)
+def get_seed_conf(tileset):
+  bbox = bbox_to_3857(tileset.bbox_x0, tileset.bbox_y0, tileset.bbox_x1, tileset.bbox_y1)
+  return seed_conf % (bbox, tileset.layer_zoom_start, tileset.layer_zoom_stop)
+
+
+def bbox_to_3857(bbox_x0, bbox_y0, bbox_x1, bbox_y1):
+    inProj = Proj(init='epsg:4326')
+    outProj = Proj(init='epsg:3857')
+
+    sw = transform(inProj, outProj, bbox_x0, bbox_y0)
+    ne = transform(inProj, outProj, bbox_x1, bbox_y1)
+
+    return [sw[0], sw[1], ne[0], ne[1]]
+
+def u_to_str(string):
+    return string.encode('ascii', 'ignore')

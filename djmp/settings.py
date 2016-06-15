@@ -5,3 +5,5 @@ CACHE_CONFIG = getattr('settings', 'CACHE_CONFIG', {
     'directory': 'cache',
     'directory_layout': 'tms'
 })
+
+FILE_CACHE_DIRECTORY = getattr('settings', 'FILE_CACHE_DIRECTORY', 'cache')

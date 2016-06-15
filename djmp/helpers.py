@@ -8,8 +8,6 @@ from mapproxy.seed import seeder
 from mapproxy.seed import util
 from django.utils.text import slugify
 
-from pyproj import Proj, transform
-
 from datetime import datetime
 import base64
 import yaml
@@ -22,7 +20,7 @@ import psutil
 import logging
 
 from .settings import CACHE_CONFIG
-from .conf_templates import get_mapproxy_conf, get_seed_conf
+from .conf_templates import get_mapproxy_conf, get_seed_conf, u_to_str
 
 
 log = logging.getLogger('djmapproxy')
@@ -33,14 +31,13 @@ def generate_confs(tileset, ignore_warnings=True, renderd=False):
     Takes a Tileset object and returns mapproxy and seed config files
     """
 
-    mapproxy_conf_json = get_mapproxy_conf(tileset.layer_name, tileset.layer_name, tileset.server_service_type)
+    mapproxy_conf_json = get_mapproxy_conf(tileset)
     mapproxy_conf = yaml.safe_load(mapproxy_conf_json)
 
-    bbox = bbox_to_3857(tileset.bbox_x0, tileset.bbox_y0, tileset.bbox_x1, tileset.bbox_y1)
-    seed_conf_json = get_seed_conf(bbox, tileset.layer_zoom_start, tileset.layer_zoom_stop)
+    seed_conf_json = get_seed_conf(tileset)
     seed_conf = yaml.safe_load(seed_conf_json)
     
-    server_service_type = u_to_str(tileset.server_service_type)
+    server_service_type = tileset.server_service_type
 
     if server_service_type == 'wms':
         mapproxy_conf['sources']['tileset_source']['req'] = {}
@@ -66,31 +63,17 @@ def generate_confs(tileset, ignore_warnings=True, renderd=False):
 
     
     errors, informal_only = validate_mapproxy_conf(mapproxy_conf)
-    for error in errors:
-        print error
     if not informal_only or (errors and not ignore_warnings):
         raise ConfigurationError('invalid configuration - {}'.format(', '.join(errors)))
 
     cf = ProxyConfiguration(mapproxy_conf, seed=seed, renderd=renderd)
 
     errors, informal_only = validate_seed_conf(seed_conf)
-    for error in errors:
-        print error
     if not informal_only:
         raise SeedConfigurationError('invalid seed configuration - {}'.format(', '.join(errors)))
     seed_cf = SeedingConfiguration(seed_conf, mapproxy_conf=cf)
 
     return cf, seed_cf
-
-
-def bbox_to_3857(bbox_x0, bbox_y0, bbox_x1, bbox_y1):
-    inProj = Proj(init='epsg:4326')
-    outProj = Proj(init='epsg:3857')
-
-    sw = transform(inProj, outProj, bbox_x0, bbox_y0)
-    ne = transform(inProj, outProj, bbox_x1, bbox_y1)
-
-    return [sw[0], sw[1], ne[0], ne[1]]
 
 def get_tileset_dir():
     conf = CACHE_CONFIG
@@ -115,10 +98,6 @@ def update_tileset_stats(tileset):
         tileset.created_at = datetime.fromtimestamp(stat.st_ctime)
         tileset.filesize = stat.st_size
         tileset.save()
-
-
-def u_to_str(string):
-    return string.encode('ascii', 'ignore')
 
 
 def is_int_str(v):
