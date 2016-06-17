@@ -2,6 +2,7 @@ import logging
 
 from django.db import models
 from django.conf import settings
+from django.core.validators import MaxValueValidator, MinValueValidator
 from mapproxy.seed.config import SeedConfigurationError, ConfigurationError
 import helpers
 
@@ -21,6 +22,11 @@ DIR_LAYOUTS = [
     ['tc', 'TileCache']
 ]
 
+SERVER_SERVICE_TYPES = [
+    ['wms','wms'],
+    ['tile', 'tile']
+]
+
 class Tileset(models.Model):
 
     # base
@@ -30,7 +36,7 @@ class Tileset(models.Model):
 
     # server
     server_url = models.URLField()
-    server_service_type = models.CharField(max_length=10)
+    server_service_type = models.CharField(max_length=10, choices=SERVER_SERVICE_TYPES)
     server_username = models.CharField(blank=True, max_length=30)
     server_password = models.CharField(blank=True, max_length=30)
 
@@ -40,10 +46,10 @@ class Tileset(models.Model):
     layer_zoom_stop = models.IntegerField()
 
     # area
-    bbox_x0 = models.DecimalField(max_digits=19, decimal_places=15, default=-180)
-    bbox_x1 = models.DecimalField(max_digits=19, decimal_places=15, default=180)
-    bbox_y0 = models.DecimalField(max_digits=19, decimal_places=15, default=-89.9)
-    bbox_y1 = models.DecimalField(max_digits=19, decimal_places=15, default=89.9)
+    bbox_x0 = models.DecimalField(max_digits=19, decimal_places=15, default=-180, validators = [MinValueValidator(-180), MaxValueValidator(180)])
+    bbox_x1 = models.DecimalField(max_digits=19, decimal_places=15, default=180, validators = [MinValueValidator(-180), MaxValueValidator(180)])
+    bbox_y0 = models.DecimalField(max_digits=19, decimal_places=15, default=-89.9, validators = [MinValueValidator(-89.9), MaxValueValidator(89.9)])
+    bbox_y1 = models.DecimalField(max_digits=19, decimal_places=15, default=89.9, validators = [MinValueValidator(-89.9), MaxValueValidator(89.9)])
 
     # cache
     cache_type = models.CharField(max_length=10, choices=CACHE_TYPES)

@@ -73,6 +73,7 @@ def generate_confs(tileset, ignore_warnings=True, renderd=False):
 
     return cf, seed_cf
 
+
 def get_tileset_dir(tileset):
     folder = tileset.directory
     if not os.path.exists(folder):
@@ -134,7 +135,7 @@ def get_status(tileset):
     # get the size and time last updated for the 'pending' tileset
     add_tileset_file_attribs(res['pending'], tileset, 'generating')
 
-    pid = get_pid_from_lock_file(tileset.id)
+    pid = get_pid_from_lock_file(tileset)
     if pid:
         process = get_is_process_running(pid)
         if process:
@@ -221,21 +222,20 @@ def seed_process_spawn(tileset):
         process.start()
         pid = process.pid
     else:
-        print '---- Not starting process. cancel was requested. '
+        log.debug(' Not starting process. cancel was requested.')
     return pid
 
 
 def seed_process_target(tileset, tasks, progress_logger):
-    print '----[ start seeding. tileset {}'.format(tileset.id)
     seeder.seed(tasks=tasks, progress_logger=progress_logger)
-
+    log.debug('start seeding. tileset {}'.format(tileset.id))
     # now that we have generated the new gpkg file, backup the last one, then rename
     # the _generating one to the main name
     # if os.path.isfile(get_tileset_filename(tileset_name)):
     #     millis = int(round(time.time() * 1000))
     #     os.rename(get_tileset_filename(tileset_name), '{}_{}'.format(get_tileset_filename(tileset_name), millis))
     # os.rename(get_tileset_filename(tileset_name, 'generating'), get_tileset_filename(tileset_name))
-    remove_lock_file(tileset.id)
+    remove_lock_file(tileset)
 
 
 def get_lock_file(tileset):
@@ -264,7 +264,7 @@ def remove_lock_file(tileset):
         os.remove(get_lock_filename(tileset))
     except OSError as e:
         # Error removing lock file
-        print '--- There was a problem removing the lock file. Something: {}'.format(e.errno)
+        log.debug('There was a problem removing the lock file. Something: {}'.format(e.errno))
         pass
 
 
@@ -286,7 +286,7 @@ def get_process_from_pid(pid):
         try:
             process = psutil.Process(pid=int(pid))
         except (psutil.NoSuchProcess, psutil.ZombieProcess):
-            print ' -- PROCESS HAS BEEN TERMINATED {}'.format(int(pid))
+            log.debug('PROCESS HAS BEEN TERMINATED {}'.format(int(pid)))
             pass
     return process
 
@@ -296,7 +296,7 @@ def get_is_process_running(pid):
         try:
             process = psutil.Process(pid=int(pid))
             exitCode = process.wait(0)
-            print ' -- waited for process.. exitCode: {}'.format(exitCode)
+            log.debug('waited for process.. exitCode: {}'.format(exitCode))
         except (psutil.NoSuchProcess, psutil.ZombieProcess, psutil.TimeoutExpired):
             pass
     return process
