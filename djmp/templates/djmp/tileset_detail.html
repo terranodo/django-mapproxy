@@ -1,0 +1,35 @@
+{% extends "djmp/base.html" %}
+
+{% block content %}
+
+<div class="page-header">
+  <h1>Tileset details for: {{ object.name }}</h1>
+</div>
+
+<div class="row">
+  <div class="col-md-6">
+    {% if user.is_superuser %}
+    <ul>
+      <button type="button" class="btn btn-success btn-circle btn nohover" data-toggle="modal" data-target="#edit-modal">Edit</button>
+    </ul>
+    {% endif %}
+    
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-12">
+    <table class="table">
+      <tbody>
+        <tr>
+          <td><strong>Name</strong></td>
+          <td>{{ object.name }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="clearfix"></div>
+
+{% endblock %}

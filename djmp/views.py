@@ -7,17 +7,12 @@ import time
 
 
 class IndexView(generic.ListView):
-    template_name = 'tilesets/index.html'
+    template_name = 'djmp/index.html'
 
     def get_queryset(self):
-        return Tileset.objects.order_by('-created_at')[:5]
+        return Tileset.objects.all()
 
 
 class DetailView(generic.DetailView):
     model = Tileset
-    template_name = 'tilesets/detail.html'
-
-
-class ResultsView(generic.DetailView):
-    model = Tileset
-    template_name = 'tilesets/results.html'
+    template_name = 'djmp/tileset_detail.html'
