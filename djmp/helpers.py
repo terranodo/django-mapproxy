@@ -43,7 +43,7 @@ def generate_confs(tileset, ignore_warnings=True, renderd=False):
         mapproxy_conf['sources']['tileset_source']['req']['url'] = u_to_str(tileset.server_url)
         mapproxy_conf['sources']['tileset_source']['req']['layers'] = u_to_str(tileset.layer_name)
         mapproxy_conf['sources']['tileset_source']['req']['transparent'] = 'true'
-   
+
     elif server_service_type == 'tile':
         mapproxy_conf['sources']['tileset_source']['url'] = u_to_str(tileset.server_url)
 

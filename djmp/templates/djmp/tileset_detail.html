@@ -12,6 +12,9 @@
     <ul>
       <button type="button" class="btn btn-success btn-circle btn nohover" data-toggle="modal" data-target="#edit-modal">Edit</button>
     </ul>
+    <ul>
+      <button id="tileset_seed" type="button" class="btn btn-success btn-circle btn nohover">Seed</button><p id="seed_message"></p>
+    </ul>
     {% endif %}
     
   </div>
@@ -32,4 +35,18 @@
 
 <div class="clearfix"></div>
 
+{% endblock %}
+{% block extrascript %}
+<script type="text/javascript">
+
+  $('#tileset_seed').click(
+    function(){
+      $.post('seed', {'csrfmiddlewaretoken': '{{ csrf_token }}'}).success(
+        function(data){
+          $('#seed_message').html(data);
+        }
+      )
+    }
+  );
+</script>
 {% endblock %}
