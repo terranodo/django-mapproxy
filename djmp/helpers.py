@@ -75,15 +75,19 @@ def generate_confs(tileset, ignore_warnings=True, renderd=False):
 
 
 def get_tileset_dir(tileset):
-    folder = get_tileset_location(tileset)
+    folder = get_tileset_base_folder(tileset)
     if not os.path.exists(folder):
         os.makedirs(folder)
     return folder
 
 
+def get_tileset_base_folder(tileset):
+    return os.path.join(tileset.directory, tileset.name)
+
+
 def get_tileset_location(tileset):
     if tileset.cache_type == 'file':
-        return os.path.join(tileset.directory, tileset.name)
+        return get_tileset_dir(tileset)
     elif tileset.cache_type == 'gpkg':
         return '{}/{}.gpkg'.format(get_tileset_dir(tileset), tileset.name)
 

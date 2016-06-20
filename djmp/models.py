@@ -14,7 +14,7 @@ CACHE_TYPES = [
     ['file', 'file'],
     #['mbtiles','mbtiles'],
     #['sqllite', 'sqllite'],
-    ['gpkg', 'gpkg']
+    ['geopackage', 'geopackage']
 ]
 
 DIR_LAYOUTS = [
