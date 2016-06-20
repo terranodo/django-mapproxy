@@ -5,6 +5,7 @@ from django.views import generic
 from django.contrib.auth.decorators import login_required
 
 from .models import Tileset
+from .helpers import get_status
 import time
 import json
 
@@ -25,3 +26,9 @@ class DetailView(generic.DetailView):
 def seed(request, pk):
     tileset = get_object_or_404(Tileset, pk=pk)
     return HttpResponse(json.dumps(tileset.seed()))
+
+
+@login_required
+def tileset_status(request, pk):
+    tileset = get_object_or_404(Tileset, pk=pk)
+    return HttpResponse(json.dumps(get_status(tileset)))

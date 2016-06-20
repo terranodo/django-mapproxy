@@ -1,4 +1,5 @@
 import json
+import os
 
 from pyproj import Proj, transform
 
@@ -75,7 +76,7 @@ def get_mapproxy_conf(tileset):
         'type': tileset.cache_type
     }
     if tileset.cache_type == 'file':
-        cache_conf['directory'] = tileset.directory
+        cache_conf['directory'] = os.path.join(tileset.directory, tileset.name)
         cache_conf['directory_layout'] = tileset.directory_layout
     if tileset.cache_type == 'gpkg':
         cache_conf['filename'] = tileset.filename

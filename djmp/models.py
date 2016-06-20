@@ -60,6 +60,9 @@ class Tileset(models.Model):
     filename = models.CharField(max_length=256, blank=True, null=True)
     table_name = models.CharField(max_length=128, blank=True, null=True)
 
+    # size
+    size = models.CharField('Size (MB)', default='0', max_length=128)
+
     def __unicode__(self):
         return self.name
 

@@ -75,14 +75,17 @@ def generate_confs(tileset, ignore_warnings=True, renderd=False):
 
 
 def get_tileset_dir(tileset):
-    folder = tileset.directory
+    folder = get_tileset_location(tileset)
     if not os.path.exists(folder):
         os.makedirs(folder)
     return folder
 
 
-def get_tileset_filename(tileset, extension='gpkg'):
-    return '{}/{}.{}'.format(get_tileset_dir(tileset), tileset.name, extension)
+def get_tileset_location(tileset):
+    if tileset.cache_type == 'file':
+        return os.path.join(tileset.directory, tileset.name)
+    elif tileset.cache_type == 'gpkg':
+        return '{}/{}.gpkg'.format(get_tileset_dir(tileset), tileset.name)
 
 
 def get_lock_filename(tileset):
@@ -90,12 +93,11 @@ def get_lock_filename(tileset):
 
 
 def update_tileset_stats(tileset):
-    tileset_filename = get_tileset_filename(tileset)
-    if os.path.isfile(tileset_filename):
-        stat = os.stat(tileset_filename)
-        tileset.created_at = datetime.fromtimestamp(stat.st_ctime)
-        tileset.filesize = stat.st_size
-        tileset.save()
+    size, updated = get_tileset_stats(tileset)
+
+    tileset.created_at = updated
+    tileset.size = size
+    tileset.save()
 
 
 def is_int_str(v):
@@ -103,13 +105,21 @@ def is_int_str(v):
     return v == '0' or (v if v.find('..') > -1 else v.lstrip('-+').rstrip('0').rstrip('.')).isdigit()
 
 
-def add_tileset_file_attribs(target_object, tileset, extension='gpkg'):
-    tileset_filename = get_tileset_filename(tileset.name, extension)
-    if os.path.isfile(tileset_filename):
-        stat = os.stat(tileset_filename)
-        if stat:
-            target_object['file_size'] = stat.st_size
-            target_object['file_updated'] = datetime.fromtimestamp(stat.st_ctime)
+def get_tileset_stats(tileset):
+    tileset_location = get_tileset_location(tileset)
+    
+    stat = os.stat(tileset_location)
+    if stat:
+        size =  os.popen('du -sh %s' % tileset_location).read().split('\t')[0]
+        updated = datetime.fromtimestamp(stat.st_ctime).isoformat()
+        return size, updated
+    return None
+
+
+def add_tileset_file_attribs(target_object, tileset):
+    size, updated = get_tileset_stats(tileset)
+    target_object['size'] = size
+    target_object['updated'] = updated
 
 
 def get_status(tileset):
@@ -124,65 +134,69 @@ def get_status(tileset):
 
     # generate status for already existing tileset
     # if there is a .gpkg file on disk, get the size and time last updated
-    tileset_filename = get_tileset_filename(tileset)
-    if os.path.isfile(tileset_filename):
+    tileset_location = get_tileset_location(tileset)
+    if os.path.exists(tileset_location):
         res['current']['status'] = 'ready'
         # get the size and time last updated for the tileset
         add_tileset_file_attribs(res['current'], tileset)
+        # get the size and time last updated for the 'pending' tileset
+        add_tileset_file_attribs(res['pending'], tileset)
+
+        pid = get_pid_from_lock_file(tileset)
+
+        if pid:
+            process = get_is_process_running(pid)
+            if process:
+                # if tileset generation is in progress
+                res['pending']['status'] = 'in progress'
+                tileset_location = get_tileset_location(tileset, 'progress_log')
+                log_filename = '%s/%s.progress_log' % (tileset_location, tileset.name)
+                if os.path.isfile(log_filename):
+                    with open(log_filename, 'r') as f:
+                        lines = f.read().replace('\r', '\n')
+                        lines = lines.split('\n')
+
+                    # an actual progress step update which looks like:
+                    # "[15:11:11]  4  50.00% 0.00000, 672645.84891, 18432942.24503, 18831637.78456 (112 tiles) ETA: 2015-07-07-15:11:12"\n
+                    latest_step = None
+                    # a progress update on the current step which looks like:
+                    # "[15:11:16]  87.50%   0000                 ETA: 2015-07-07-15:11:17'\r
+                    latest_progress = None
+                    if len(lines) > 0:
+                        for line in lines[::-1]:
+                            tokens = line.split()
+                            if len(tokens) > 2:
+                                if is_int_str(tokens[1]):
+                                    latest_step = tokens
+                                    break
+                                elif tokens[1].endswith('%'):
+                                    if latest_progress is None:
+                                        # keep going, don't break
+                                        latest_progress = tokens
+                                        continue
+                    if latest_step:
+                        # if we have a step %, up date the progress %
+                        if latest_progress:
+                            latest_step[2] = latest_progress[1]
+
+                        res['pending']['progress'] = latest_step[2][0:-1]
+                        res['pending']['current_zoom_level'] = latest_step[1]
+
+                        # get the eta but pass if date is cannot be parsed.
+                        try:
+                            iso_date = parser.parse(latest_step[len(latest_step) - 1]).isoformat()
+                            res['pending']['estimated_completion_time'] = iso_date
+                        except ValueError:
+                            pass
+                else:
+                    res['pending']['status'] = 'in progress, but log not found'
+            else:
+                res['pending']['status'] = 'stopped'
     else:
+        res.pop('pending', None)
         res['current']['status'] = 'not generated'
 
-    # get the size and time last updated for the 'pending' tileset
-    add_tileset_file_attribs(res['pending'], tileset, 'generating')
-
-    pid = get_pid_from_lock_file(tileset)
-    if pid:
-        process = get_is_process_running(pid)
-        if process:
-            # if tileset generation is in progress
-            res['pending']['status'] = 'in progress'
-            progress_log_filename = get_tileset_filename(tileset, 'progress_log')
-            if os.path.isfile(progress_log_filename):
-                with open(progress_log_filename, 'r') as f:
-                    lines = f.read().replace('\r', '\n')
-                    lines = lines.split('\n')
-
-                # an actual progress step update which looks like:
-                # "[15:11:11]  4  50.00% 0.00000, 672645.84891, 18432942.24503, 18831637.78456 (112 tiles) ETA: 2015-07-07-15:11:12"\n
-                latest_step = None
-                # a progress update on the current step which looks like:
-                # "[15:11:16]  87.50%   0000                 ETA: 2015-07-07-15:11:17'\r
-                latest_progress = None
-                if len(lines) > 0:
-                    for line in lines[::-1]:
-                        tokens = line.split()
-                        if len(tokens) > 2:
-                            if is_int_str(tokens[1]):
-                                latest_step = tokens
-                                break
-                            elif tokens[1].endswith('%'):
-                                if latest_progress is None:
-                                    # keep going, don't break
-                                    latest_progress = tokens
-                                    continue
-                if latest_step:
-                    # if we have a step %, up date the progress %
-                    if latest_progress:
-                        latest_step[2] = latest_progress[1]
-
-                    res['pending']['progress'] = latest_step[2][0:-1]
-                    res['pending']['current_zoom_level'] = latest_step[1]
-
-                    # get the eta but pass if date is cannot be parsed.
-                    try:
-                        iso_date = parser.parse(latest_step[len(latest_step) - 1]).isoformat()
-                        res['pending']['estimated_completion_time'] = iso_date
-                    except ValueError:
-                        pass
-            else:
-                res['pending']['status'] = 'in progress, but log not found'
-        else:
-            res['pending']['status'] = 'stopped'
+    
     return res
     
 
@@ -202,17 +216,20 @@ def seed_process_spawn(tileset):
     mapproxy_conf, seed_conf = generate_confs(tileset)
 
     # if there is an old _generating one around, back it up
+    tileset_location = get_tileset_location(tileset)
+
     backup_millis = int(round(time.time() * 1000))
-    if os.path.isfile(get_tileset_filename(tileset, 'generating')):
-        os.rename(get_tileset_filename(tileset, 'generating'), '{}_{}'.format(get_tileset_filename(tileset, 'generating'), backup_millis))
+    generating_filename = '%s/%s.generating' % (tileset_location, tileset.name)
+    if os.path.isfile(generating_filename):
+        os.rename(generating_filename, '{}_{}'.format(generating_filename, backup_millis))
 
     # if there is an old progress_log around, back it up
-    if os.path.isfile(get_tileset_filename(tileset, 'progress_log')):
-        os.rename(get_tileset_filename(tileset, 'progress_log'), '{}_{}'.format(get_tileset_filename(tileset, 'generating'), backup_millis))
+    log_filename = '%s/%s.progress_log' % (tileset_location, tileset.name)
+    if os.path.isfile(log_filename):
+        os.rename(log_filename, '{}_{}'.format(log_filename, backup_millis))
 
     # generate the new gpkg as name.generating file
-    progress_log_filename = get_tileset_filename(tileset, 'progress_log')
-    out = open(progress_log_filename, 'w+')
+    out = open(log_filename, 'w+')
     progress_logger = util.ProgressLog(out=out, verbose=True, silent=False)
     tasks = seed_conf.seeds(['tileset_seed'])
     # launch the task using another process
@@ -289,6 +306,7 @@ def get_process_from_pid(pid):
             log.debug('PROCESS HAS BEEN TERMINATED {}'.format(int(pid)))
             pass
     return process
+
 
 def get_is_process_running(pid):
     process = None
