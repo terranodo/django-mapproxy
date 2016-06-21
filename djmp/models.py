@@ -31,7 +31,7 @@ class Tileset(models.Model):
 
     # base
     name = models.CharField(unique=True, max_length=30)
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True)
+    created_by = models.CharField(max_length=256)
     created_at = models.DateTimeField(auto_now_add=True)
 
     # server
