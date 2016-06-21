@@ -23,11 +23,12 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[
-        'Django>=1.6.10',
+        'Django==1.8.7',
         'MapProxy==1.8.0',
         'PyYAML>=3.10',
         'django-tastypie>=0.12.1',
         'Shapely>=1.5.9',
-        'psutil>=3.0.1'
+        'psutil>=3.0.1',
+        'pyproj==1.9.5.1',
     ]
 )
