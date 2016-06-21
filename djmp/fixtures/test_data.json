@@ -1,0 +1,46 @@
+[
+{
+    "model": "auth.user",
+    "pk": 1,
+    "fields": {
+        "password": "pbkdf2_sha256$24000$fdDd1LjXvMhe$RioBztce737+lg3HAQApHEFkp0n8GvXb2xnqu/kv7k8=",
+        "last_login": null,
+        "is_superuser": true,
+        "username": "admin",
+        "first_name": "",
+        "last_name": "",
+        "email": "",
+        "is_staff": true,
+        "is_active": true,
+        "date_joined": "2016-06-21T07:45:04.193Z",
+        "groups": [],
+        "user_permissions": []
+    }
+},
+{
+    "fields": {
+        "server_password": "geoserver",
+        "bbox_y0": "-5.5187329999999",
+        "bbox_x1": "97.10970532",
+        "server_service_type": "wms",
+        "name": "streams",
+        "bbox_y1": "-5.3035455519999",
+        "size": "0",
+        "created_at": "2016-06-21T07:45:04.193Z",
+        "cache_type": "file",
+        "server_url": "http://demo.geonode.org/geoserver/wms",
+        "created_by": "admin",
+        "filename": "",
+        "layer_zoom_start": 6,
+        "bbox_x0": "96.956",
+        "table_name": "",
+        "layer_name": "geonode:test_grid",
+        "directory": "cache/layers",
+        "server_username": "admin",
+        "directory_layout": "tms",
+        "layer_zoom_stop": 14
+    },
+    "model": "djmp.tileset",
+    "pk": 1
+}
+]
