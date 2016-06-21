@@ -1,3 +1,6 @@
+import time
+import json
+
 from django.shortcuts import get_object_or_404, render
 from django.http import HttpResponseRedirect, HttpResponse
 from django.core.urlresolvers import reverse
@@ -6,8 +9,6 @@ from django.contrib.auth.decorators import login_required
 
 from .models import Tileset
 from .helpers import get_status
-import time
-import json
 
 
 class IndexView(generic.ListView):

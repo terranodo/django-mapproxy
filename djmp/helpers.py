@@ -1,4 +1,14 @@
+import yaml
+import os
+import errno
+import time
+import multiprocessing
+import psutil
+import logging
+from datetime import datetime
+from dateutil import parser
 
+from django.utils.text import slugify
 from mapproxy.seed.seeder import seed
 from mapproxy.seed.config import SeedingConfiguration, SeedConfigurationError, ConfigurationError
 from mapproxy.seed.spec import validate_seed_conf
@@ -6,20 +16,8 @@ from mapproxy.config.loader import ProxyConfiguration
 from mapproxy.config.spec import validate_mapproxy_conf
 from mapproxy.seed import seeder
 from mapproxy.seed import util
-from django.utils.text import slugify
 
-from datetime import datetime
-import base64
-import yaml
-import os
-import errno
-import time
-from dateutil import parser
-import multiprocessing
-import psutil
-import logging
-
-from .conf_templates import get_mapproxy_conf, get_seed_conf, u_to_str
+from .mapproxy_config import get_mapproxy_conf, get_seed_conf, u_to_str
 
 
 log = logging.getLogger('djmapproxy')
@@ -35,30 +33,6 @@ def generate_confs(tileset, ignore_warnings=True, renderd=False):
 
     seed_conf_json = get_seed_conf(tileset)
     seed_conf = yaml.safe_load(seed_conf_json)
-    
-    server_service_type = tileset.server_service_type
-
-    if server_service_type == 'wms':
-        mapproxy_conf['sources']['tileset_source']['req'] = {}
-        mapproxy_conf['sources']['tileset_source']['req']['url'] = u_to_str(tileset.server_url)
-        mapproxy_conf['sources']['tileset_source']['req']['layers'] = u_to_str(tileset.layer_name)
-        mapproxy_conf['sources']['tileset_source']['req']['transparent'] = 'true'
-
-    elif server_service_type == 'tile':
-        mapproxy_conf['sources']['tileset_source']['url'] = u_to_str(tileset.server_url)
-
-    if tileset.layer_zoom_start > tileset.layer_zoom_stop:
-        raise ConfigurationError('invalid configuration - zoom start is greater than zoom stop')
-    seed_conf['seeds']['tileset_seed']['levels']['from'] = tileset.layer_zoom_start
-    seed_conf['seeds']['tileset_seed']['levels']['to'] = tileset.layer_zoom_stop
-
-    if tileset.server_username and tileset.server_password:
-
-        encoded = base64.b64encode('{}:{}'.format(tileset.server_username, tileset.server_password))
-        mapproxy_conf['sources']['tileset_source']['http'] = {}
-        mapproxy_conf['sources']['tileset_source']['http']['headers'] = {}
-        mapproxy_conf['sources']['tileset_source']['http']['headers']['Authorization'] = 'Basic {}'.format(encoded)
-        mapproxy_conf['sources']['tileset_source']['http']['ssl_no_cert_checks'] = True
 
     errors, informal_only = validate_mapproxy_conf(mapproxy_conf)
     if not informal_only or (errors and not ignore_warnings):

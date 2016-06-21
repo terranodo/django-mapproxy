@@ -1,5 +1,6 @@
 from django.contrib import admin
-from models import Tileset
+
+from .models import Tileset
 
 class TilesetAdmin(admin.ModelAdmin):
     readonly_fields=('size',)

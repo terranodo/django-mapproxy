@@ -1,10 +1,10 @@
 import logging
+import helpers
 
 from django.db import models
 from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from mapproxy.seed.config import SeedConfigurationError, ConfigurationError
-import helpers
 
 from .settings import FILE_CACHE_DIRECTORY
 
@@ -24,7 +24,8 @@ DIR_LAYOUTS = [
 
 SERVER_SERVICE_TYPES = [
     ['wms','wms'],
-    ['tile', 'tile']
+    ['tile', 'tile'],
+    ['mapnik', 'mapnik']
 ]
 
 class Tileset(models.Model):
