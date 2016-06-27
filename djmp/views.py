@@ -6,12 +6,10 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.core.urlresolvers import reverse
 from django.views import generic
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
 
 from mapproxy.config.config import load_default_config, load_config
 from mapproxy.util.ext.dictspec.validator import validate, ValidationError
-from mapproxy.config.validator import validate_references
 from mapproxy.config.loader import ProxyConfiguration, ConfigurationError
 from mapproxy.wsgiapp import MapProxyApp
 
@@ -26,6 +24,7 @@ log = logging.getLogger('mapproxy.config')
 
 from .models import Tileset
 from .helpers import get_status
+from .validator import validate_references, validate_options
 
 
 class IndexView(generic.ListView):
@@ -52,19 +51,7 @@ def tileset_status(request, pk):
     return HttpResponse(json.dumps(get_status(tileset)))
 
 
-def validate_options(conf_dict):
-    """
-    Validate `conf_dict` agains mapproxy.yaml spec.
-    Returns tuple with a list of errors and a bool.
-    The list is empty when no errors where found.
-    The bool is True when the errors are informal and not critical.
-    """
-    try:
-        validate(mapproxy_yaml_spec, conf_dict)
-    except ValidationError as ex:
-        return ex.errors, ex.informal_only
-    else:
-        return [], True
+
 
 
 class TestApp(TestApp_):
