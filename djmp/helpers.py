@@ -13,7 +13,7 @@ from mapproxy.seed.seeder import seed
 from mapproxy.seed.config import SeedingConfiguration, SeedConfigurationError, ConfigurationError
 from mapproxy.seed.spec import validate_seed_conf
 from mapproxy.config.loader import ProxyConfiguration
-from mapproxy.config.spec import validate_mapproxy_conf
+from mapproxy.config.spec import validate_options
 from mapproxy.seed import seeder
 from mapproxy.seed import util
 
@@ -34,7 +34,7 @@ def generate_confs(tileset, ignore_warnings=True, renderd=False):
     seed_conf_json = get_seed_conf(tileset)
     seed_conf = yaml.safe_load(seed_conf_json)
 
-    errors, informal_only = validate_mapproxy_conf(mapproxy_conf)
+    errors, informal_only = validate_options(mapproxy_conf)
     if not informal_only or (errors and not ignore_warnings):
         raise ConfigurationError('invalid configuration - {}'.format(', '.join(errors)))
 
