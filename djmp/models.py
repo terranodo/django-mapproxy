@@ -1,5 +1,6 @@
 import logging
 import helpers
+from pyproj import Proj, transform
 
 from django.db import models
 from django.conf import settings
@@ -116,3 +117,17 @@ class Tileset(models.Model):
             res = {'status': 'already started'}
 
         return res
+
+    def bbox_3857(self):
+        inProj = Proj(init='epsg:4326')
+        outProj = Proj(init='epsg:3857')
+
+        sw = transform(inProj, outProj, self.bbox_x0, self.bbox_y0)
+        ne = transform(inProj, outProj, self.bbox_x1, self.bbox_y1)
+
+        return [sw[0], sw[1], ne[0], ne[1]]
+
+    def bbox(self):
+        return [self.bbox_x0, self.bbox_y0, self.bbox_x1, self.bbox_y1]
+
+
