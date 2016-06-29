@@ -87,7 +87,7 @@ def get_mapproxy_conf(tileset):
     sources_conf['tileset_source']['type'] = u_to_str(server_service_type)
 
     if server_service_type == 'mapnik':
-        sources_conf['tileset_source']['mapfile'] = tileset.mapnik_conf 
+        sources_conf['tileset_source']['mapfile'] = tileset.mapfile.path 
         sources_conf['tileset_source']['layers'] = [u_to_str(tileset.name)]
         sources_conf['tileset_source']['transparent'] = True
         sources_conf['tileset_source']['coverage'] = {}

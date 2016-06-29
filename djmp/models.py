@@ -36,7 +36,7 @@ class Tileset(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     # server
-    server_url = models.URLField()
+    server_url = models.URLField(blank=True, null=True)
     server_service_type = models.CharField(max_length=10, choices=SERVER_SERVICE_TYPES)
     server_username = models.CharField(blank=True, max_length=30)
     server_password = models.CharField(blank=True, max_length=30)
@@ -60,6 +60,9 @@ class Tileset(models.Model):
     # gpkg cache params
     filename = models.CharField(max_length=256, blank=True, null=True)
     table_name = models.CharField(max_length=128, blank=True, null=True)
+
+    # mapnik params
+    mapfile = models.FileField(blank=True, null=True, upload_to='mapfiles')
 
     # size
     size = models.CharField('Size (MB)', default='0', max_length=128)
@@ -102,13 +105,12 @@ class Tileset(models.Model):
                 res = {'status': 'started'}
             except (SeedConfigurationError, ConfigurationError) as e:
                 log.error('Something went wrong when generating.. removing lock file')
-
-                helpers.remove_lock_file(self)
                 res = {'status': 'unable to start',
                        'error': e.message}
             finally:
                 lock_file.flush()
                 lock_file.close()
+                helpers.remove_lock_file(self)
         else:
             log.debug('tileset.generate, will NOT generate. already running, pid: {}'.format(helpers.get_pid_from_lock_file(self)))
             res = {'status': 'already started'}
