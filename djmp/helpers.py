@@ -14,6 +14,7 @@ from mapproxy.seed.config import SeedingConfiguration, SeedConfigurationError, C
 from mapproxy.seed.spec import validate_seed_conf
 from mapproxy.config.loader import ProxyConfiguration
 from mapproxy.config.spec import validate_options
+from mapproxy.config.config import load_default_config, load_config
 from mapproxy.seed import seeder
 from mapproxy.seed import util
 
@@ -27,25 +28,30 @@ def generate_confs(tileset, ignore_warnings=True, renderd=False):
     """
     Takes a Tileset object and returns mapproxy and seed config files
     """
+    # Start with a sane configuration using MapProxy's defaults
+    mapproxy_config = load_default_config()
 
-    mapproxy_conf_json = get_mapproxy_conf(tileset)
-    mapproxy_conf = yaml.safe_load(mapproxy_conf_json)
+    tileset_conf_json = get_mapproxy_conf(tileset)
+    tileset_conf = yaml.safe_load(tileset_conf_json)
+
+    # merge our config
+    load_config(mapproxy_config, config_dict=tileset_conf)
 
     seed_conf_json = get_seed_conf(tileset)
     seed_conf = yaml.safe_load(seed_conf_json)
 
-    errors, informal_only = validate_options(mapproxy_conf)
+    errors, informal_only = validate_options(mapproxy_config)
     if not informal_only or (errors and not ignore_warnings):
         raise ConfigurationError('invalid configuration - {}'.format(', '.join(errors)))
 
-    cf = ProxyConfiguration(mapproxy_conf, seed=seed, renderd=renderd)
+    mapproxy_cf = ProxyConfiguration(mapproxy_config, seed=seed, renderd=renderd)
 
     errors, informal_only = validate_seed_conf(seed_conf)
     if not informal_only:
         raise SeedConfigurationError('invalid seed configuration - {}'.format(', '.join(errors)))
-    seed_cf = SeedingConfiguration(seed_conf, mapproxy_conf=cf)
+    seed_cf = SeedingConfiguration(seed_conf, mapproxy_conf=mapproxy_cf)
 
-    return cf, seed_cf
+    return mapproxy_cf, seed_cf
 
 
 def get_tileset_dir(tileset):

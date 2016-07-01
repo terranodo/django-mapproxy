@@ -2,13 +2,22 @@ import json
 import os
 import base64
 
-from pyproj import Proj, transform
 
 services_conf = {
-    "wms":{
-        "on_source_errors":"raise",
-        "image_formats": ["image/png"]
-    }
+    'wms': {'image_formats': ['image/png'],
+          'md': {'abstract': 'This is the Harvard HyperMap Proxy.',
+                 'title': 'Harvard HyperMap Proxy'},
+          'srs': ['EPSG:4326', 'EPSG:3857'],
+          'versions': ['1.1.1']},
+    'wmts': {
+          'restful': True,
+          'restful_template':
+          '/{Layer}/{TileMatrixSet}/{TileMatrix}/{TileCol}/{TileRow}.png',
+          },
+    'tms': {
+          'origin': 'nw',
+          },
+    'demo': None
 }
 
 layers_conf = [{
@@ -91,7 +100,7 @@ def get_mapproxy_conf(tileset):
         sources_conf['tileset_source']['layers'] = [u_to_str(tileset.name)]
         sources_conf['tileset_source']['transparent'] = True
         sources_conf['tileset_source']['coverage'] = {}
-        sources_conf['tileset_source']['coverage']['bbox'] = bbox_to_3857(tileset)
+        sources_conf['tileset_source']['coverage']['bbox'] = tileset.bbox_3857()
         sources_conf['tileset_source']['coverage']['srs'] = 'EPSG:3857'
 
     elif server_service_type == 'wms':
@@ -123,7 +132,8 @@ def get_mapproxy_conf(tileset):
             'globals': {
                 "image": {
                     "paletted": False
-                }
+                },
+                'http': {'ssl_no_cert_checks': True},
             }
         })
 
@@ -139,20 +149,11 @@ def get_seed_conf(tileset):
     seed_conf['seeds']['tileset_seed']['levels']['from'] = tileset.layer_zoom_start
     seed_conf['seeds']['tileset_seed']['levels']['to'] = tileset.layer_zoom_stop
 
-    bbox = bbox_to_3857(tileset)
-
-    seed_conf['coverages']['tileset_geom']['bbox'] = bbox
+    seed_conf['coverages']['tileset_geom']['bbox'] = tileset.bbox_3857()
     
     return json.dumps(seed_conf)
 
-def bbox_to_3857(tileset):
-    inProj = Proj(init='epsg:4326')
-    outProj = Proj(init='epsg:3857')
 
-    sw = transform(inProj, outProj, tileset.bbox_x0, tileset.bbox_y0)
-    ne = transform(inProj, outProj, tileset.bbox_x1, tileset.bbox_y1)
-
-    return [sw[0], sw[1], ne[0], ne[1]]
 
 def u_to_str(string):
     return string.encode('ascii', 'ignore')
