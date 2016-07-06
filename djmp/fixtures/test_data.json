@@ -22,7 +22,7 @@
         "server_password": "geoserver",
         "bbox_y0": "-5.5187329999999",
         "bbox_x1": "97.10970532",
-        "server_service_type": "wms",
+        "source_type": "wms",
         "name": "streams",
         "bbox_y1": "-5.3035455519999",
         "size": "0",

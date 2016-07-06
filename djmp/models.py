@@ -23,7 +23,7 @@ DIR_LAYOUTS = [
     ['tc', 'TileCache']
 ]
 
-SERVER_SERVICE_TYPES = [
+SOURCE_TYPES = [
     ['wms','wms'],
     ['tile', 'tile'],
     ['mapnik', 'mapnik']
@@ -35,10 +35,11 @@ class Tileset(models.Model):
     name = models.CharField(unique=True, max_length=30)
     created_by = models.CharField(max_length=256)
     created_at = models.DateTimeField(auto_now_add=True)
+    source_type = models.CharField(max_length=10, choices=SOURCE_TYPES)
+
 
     # server
     server_url = models.URLField(blank=True, null=True)
-    server_service_type = models.CharField(max_length=10, choices=SERVER_SERVICE_TYPES)
     server_username = models.CharField(blank=True, max_length=30)
     server_password = models.CharField(blank=True, max_length=30)
 

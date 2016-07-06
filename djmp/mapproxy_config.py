@@ -91,11 +91,11 @@ def get_mapproxy_conf(tileset):
         caches_conf['tileset_cache']['cache']['table_name'] = tileset.table_name
 
     # source
-    server_service_type = tileset.server_service_type
+    source_type = tileset.source_type
 
-    sources_conf['tileset_source']['type'] = u_to_str(server_service_type)
+    sources_conf['tileset_source']['type'] = u_to_str(source_type)
 
-    if server_service_type == 'mapnik':
+    if source_type == 'mapnik':
         sources_conf['tileset_source']['mapfile'] = tileset.mapfile.path 
         sources_conf['tileset_source']['layers'] = [u_to_str(tileset.name)]
         sources_conf['tileset_source']['transparent'] = True
@@ -103,13 +103,13 @@ def get_mapproxy_conf(tileset):
         sources_conf['tileset_source']['coverage']['bbox'] = tileset.bbox_3857()
         sources_conf['tileset_source']['coverage']['srs'] = 'EPSG:3857'
 
-    elif server_service_type == 'wms':
+    elif source_type == 'wms':
         sources_conf['tileset_source']['req'] = {}
-        sources_conf['tileset_source']['req']['url'] = u_to_str(tileset.server_url)
+        sources_conf['tileset_source']['req']['url'] = u_to_str(tileset.source_type)
         sources_conf['tileset_source']['req']['layers'] = u_to_str(tileset.layer_name)
         sources_conf['tileset_source']['req']['transparent'] = 'true'
 
-    elif server_service_type == 'tile':
+    elif source_type == 'tile':
         sources_conf['sources']['tileset_source']['url'] = u_to_str(tileset.server_url)
 
     if tileset.server_username and tileset.server_password:
