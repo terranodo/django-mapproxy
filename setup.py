@@ -26,7 +26,7 @@ setup(
         'Django==1.8.7',
         'MapProxy==1.8.2',
         'PyYAML>=3.10',
-        'django-tastypie>=0.12.1',
+        'django-tastypie==0.13.3',
         'Shapely>=1.5.9',
         'psutil>=3.0.1',
         'pyproj==1.9.5.1',
