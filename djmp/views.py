@@ -95,7 +95,7 @@ def tileset_mapproxy(request, pk, path_info):
 
     params = {}
     headers = {
-       'X-Script-Name': '%s/map' % tileset.id,
+       'X-Script-Name': str(request.get_full_path()),
        'X-Forwarded-Host': request.META['HTTP_HOST'],
        'HTTP_HOST': request.META['HTTP_HOST'],
        'SERVER_NAME': request.META['SERVER_NAME'],
