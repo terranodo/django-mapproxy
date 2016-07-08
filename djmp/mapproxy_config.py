@@ -105,7 +105,7 @@ def get_mapproxy_conf(tileset):
 
     elif source_type == 'wms':
         sources_conf['tileset_source']['req'] = {}
-        sources_conf['tileset_source']['req']['url'] = u_to_str(tileset.source_type)
+        sources_conf['tileset_source']['req']['url'] = u_to_str(tileset.server_url)
         sources_conf['tileset_source']['req']['layers'] = u_to_str(tileset.layer_name)
         sources_conf['tileset_source']['req']['transparent'] = 'true'
 
