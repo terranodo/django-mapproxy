@@ -80,8 +80,8 @@ def seed_seeds(tileset):
 
 services_conf = {
     'wms': {'image_formats': ['image/png'],
-          'md': {'abstract': 'This is the Harvard HyperMap Proxy.',
-                 'title': 'Harvard HyperMap Proxy'},
+          'md': {'abstract': 'Djmp',
+                 'title': 'Djmp'},
           'srs': ['EPSG:4326', 'EPSG:3857'],
           'versions': ['1.1.1']},
     'wmts': {
