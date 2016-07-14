@@ -44,7 +44,7 @@ def tile_source(tileset):
 def file_cache(tileset):
     return {
         "type": "file",
-        "directory": os.path.join(tileset.directory, tileset.name),
+        "directory": os.path.join(tileset.directory, str(tileset.id)),
         "directory_layout": tileset.directory_layout
     }
 
