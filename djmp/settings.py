@@ -68,6 +68,6 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-FILE_CACHE_DIRECTORY = getattr('settings', 'FILE_CACHE_DIRECTORY', 'cache/layers')
+FILE_CACHE_DIRECTORY = 'cache/layers'
 
 TASTYPIE_DEFAULT_FORMATS = ['json']
