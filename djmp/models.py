@@ -66,6 +66,9 @@ class Tileset(models.Model):
     # mapnik params
     mapfile = models.FileField(blank=True, null=True, upload_to='mapfiles')
 
+    # geonode params
+    layer_uuid = models.CharField(max_length=36, null=True, blank=True)
+
     # size
     size = models.CharField('Size (MB)', default='0', max_length=128)
 
