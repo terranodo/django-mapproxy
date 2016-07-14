@@ -1,6 +1,9 @@
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+
+from django.conf import settings
+
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 
@@ -68,6 +71,6 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-FILE_CACHE_DIRECTORY = 'cache/layers'
+FILE_CACHE_DIRECTORY = getattr(settings, 'FILE_CACHE_DIRECTORY', 'cache/layers')
 
 TASTYPIE_DEFAULT_FORMATS = ['json']
