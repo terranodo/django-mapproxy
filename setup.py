@@ -35,5 +35,6 @@ setup(
         'mimeparse==0.1.3',
         'beautifulsoup4==4.4.1',
         'WebOb==1.6.1',
+        'Pillow==3.3.0',
     ]
 )
