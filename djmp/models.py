@@ -31,7 +31,7 @@ SOURCE_TYPES = [
 class Tileset(models.Model):
 
     # base
-    name = models.CharField(unique=True, max_length=255)
+    name = models.CharField(max_length=255)
     created_by = models.CharField(max_length=256)
     created_at = models.DateTimeField(auto_now_add=True)
     source_type = models.CharField(max_length=10, choices=SOURCE_TYPES)
@@ -39,13 +39,13 @@ class Tileset(models.Model):
 
     # server
     server_url = models.URLField(blank=True, null=True)
-    server_username = models.CharField(blank=True, max_length=30)
-    server_password = models.CharField(blank=True, max_length=30)
+    server_username = models.CharField(blank=True, null=True, max_length=30)
+    server_password = models.CharField(blank=True, null=True, max_length=30)
 
     # layer
-    layer_name = models.CharField(blank=True, max_length=200)
-    layer_zoom_start = models.IntegerField(blank=True, default=0)
-    layer_zoom_stop = models.IntegerField()
+    layer_name = models.CharField(blank=True, null=True, max_length=200)
+    layer_zoom_start = models.IntegerField(default=0)
+    layer_zoom_stop = models.IntegerField(default=12)
 
     # area
     bbox_x0 = models.DecimalField(max_digits=19, decimal_places=15, default=-180, validators = [MinValueValidator(-180), MaxValueValidator(180)])
