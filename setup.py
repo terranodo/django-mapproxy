@@ -32,5 +32,6 @@ setup(
         'pyproj==1.9.5.1',
         'webtest==2.0.20',
         'python-dateutil==2.5.3',
+        'mimeparse==0.1.3'
     ]
 )
