@@ -31,5 +31,6 @@ setup(
         'psutil>=3.0.1',
         'pyproj==1.9.5.1',
         'webtest==2.0.20',
+        'python-dateutil==2.5.3',
     ]
 )
