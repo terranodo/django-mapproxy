@@ -32,5 +32,10 @@ setup(
         'pyproj==1.9.5.1',
         'webtest==2.0.20',
         'django-guardian==1.4.4',
+        'python-dateutil==2.5.3',
+        'mimeparse==0.1.3',
+        'beautifulsoup4==4.4.1',
+        'WebOb==1.6.1',
+        'Pillow==3.3.0',
     ]
 )
