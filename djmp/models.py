@@ -4,8 +4,9 @@ from pyproj import Proj, transform
 
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
+from guardian.shortcuts import assign_perm
 from mapproxy.seed.config import SeedConfigurationError, ConfigurationError
-
+ 
 from .settings import FILE_CACHE_DIRECTORY
 
 log = logging.getLogger('djmapproxy')
@@ -29,7 +30,6 @@ SOURCE_TYPES = [
 ]
 
 class Tileset(models.Model):
-
     # base
     name = models.CharField(max_length=255)
     created_by = models.CharField(max_length=256)
@@ -133,4 +133,16 @@ class Tileset(models.Model):
     def bbox(self):
         return [self.bbox_x0, self.bbox_y0, self.bbox_x1, self.bbox_y1]
 
+    def add_read_perm(self, user_or_group):
+        return assign_perm('view_tileset', user_or_group, self)
 
+    def set_up_permissions(self, user_or_group=None):
+        # TODO(mvv): handle default anonymous permissions
+
+        if user_or_group:
+            self.add_read_perm(user_or_group)
+
+    class Meta:
+        permissions = (
+            ('view_tileset', 'View Tileset'),
+        )

@@ -31,6 +31,7 @@ setup(
         'psutil>=3.0.1',
         'pyproj==1.9.5.1',
         'webtest==2.0.20',
+        'django-guardian==1.4.4',
         'python-dateutil==2.5.3',
         'mimeparse==0.1.3',
         'beautifulsoup4==4.4.1',

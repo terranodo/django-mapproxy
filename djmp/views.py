@@ -1,32 +1,30 @@
-import time
 import json
+import logging
+import os
+import tempfile
+import time
 
 from django.shortcuts import get_object_or_404, render
 from django.http import HttpResponseRedirect, HttpResponse
 from django.core.urlresolvers import reverse
 from django.views import generic
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.http import HttpResponse
-
+from guardian.decorators import permission_required_or_403
 from mapproxy.config.config import load_default_config, load_config
 from mapproxy.util.ext.dictspec.validator import validate, ValidationError
 from mapproxy.config.loader import ProxyConfiguration, ConfigurationError
 from mapproxy.wsgiapp import MapProxyApp
-
 from webtest import TestApp as TestApp_
-
-import os
 import yaml
-import logging
-import tempfile
-log = logging.getLogger('mapproxy.config')
-
 
 from .models import Tileset
 from .helpers import get_status, generate_confs
 from .validator import validate_references, validate_options
 
 
+log = logging.getLogger('mapproxy.config')
 class IndexView(generic.ListView):
     template_name = 'djmp/index.html'
 
@@ -83,8 +81,15 @@ def get_mapproxy(tileset):
     # Wrap it in an object that allows to get requests by path as a string.
     return TestApp(app), mapproxy_cf
 
+
 def tileset_mapproxy(request, pk, path_info):
     tileset = get_object_or_404(Tileset, pk=pk)
+    # TODO(mvv): this could be handled as a decorator or some 
+    #            other more generalizable pattern
+    allowed = request.user.has_perm('view_tileset', tileset)
+    if not allowed:
+        response = HttpResponse("forbidden", status=403)
+        return response
 
     mp, yaml_config = get_mapproxy(tileset)
 
