@@ -21,18 +21,6 @@ class DjmpTestBase(TestCase):
         self.passwd = 'admin'
         self.client = Client()
 
-
-class DjmpTest(DjmpTestBase):
-    def test_seeding(self):
-        """ test seeding"""
-        self.client.login(username='admin', password='admin')
-        resp = self.client.get(reverse('tileset_seed', args=(1,)))
-        self.assertEqual('{"status": "started"}', resp.content)
-
-
-class TilesetTestBase(DjmpTestBase):
-    def setUp(self):
-        super(TilesetTestBase, self).setUp()
         self.headers = {
             # TODO(mvv): these headers are specific to mvv's local env, that 
             #            may be bad long term
@@ -41,6 +29,28 @@ class TilesetTestBase(DjmpTestBase):
             'SERVER_NAME': 'michaels-macbook-pro-2.local',
             'X-Forwarded-Host': 'localhost:8000'
         }
+
+
+class DjmpTest(DjmpTestBase):
+    def test_seeding(self):
+        """ test seeding"""
+        self.client.login(username='admin', password='admin')
+        resp = self.client.get(reverse('tileset_seed', args=(1,)))
+        self.assertEqual('{"status": "started"}', resp.content)
+
+    def test_tileset_404(self):
+        uri = reverse(
+            'tileset_mapproxy',
+            args=(42, u'/tms/1.0.0/streams/EPSG3857/1/0/0.png')
+        )
+        res = self.client.get(uri, **self.headers)
+        self.assertEqual(res.status_code, 404)
+
+
+class TilesetTestBase(DjmpTestBase):
+    def setUp(self):
+        super(TilesetTestBase, self).setUp()
+
         # seed tile
         resp = self.client.get(reverse('tileset_seed', args=(1,)))
 
@@ -90,3 +100,30 @@ class TilesetAuthTest(TilesetTestBase):
         self.client.login(username='testuser', password='testuser')
         res = self.client.get(self.uri, **self.headers)
         self.assertEqual(res.status_code, 403)
+
+
+class TilesetAuthTestDetailView(TilesetAuthTest):
+    def setUp(self):
+        super(TilesetAuthTestDetailView, self).setUp()
+        self.uri = reverse(
+            'tileset_detail',
+            args=(1,)
+        )
+
+
+class TilesetAuthTestSeedView(TilesetAuthTest):
+    def setUp(self):
+        super(TilesetAuthTestSeedView, self).setUp()
+        self.uri = reverse(
+            'tileset_seed',
+            args=(1,)
+        )
+
+
+class TilesetAuthTestSeedView(TilesetAuthTest):
+    def setUp(self):
+        super(TilesetAuthTestSeedView, self).setUp()
+        self.uri = reverse(
+            'tileset_status',
+            args=(1,)
+        )
