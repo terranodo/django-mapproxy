@@ -110,7 +110,6 @@ class TilesetAuthTestDetailView(TilesetAuthTest):
             args=(1,)
         )
 
-
 class TilesetAuthTestSeedView(TilesetAuthTest):
     def setUp(self):
         super(TilesetAuthTestSeedView, self).setUp()
@@ -127,3 +126,9 @@ class TilesetAuthTestSeedView(TilesetAuthTest):
             'tileset_status',
             args=(1,)
         )
+
+
+class TilesetAuthTestAPIView(TilesetAuthTest):
+    def setUp(self):
+        super(TilesetAuthTestAPIView, self).setUp()
+        self.uri = '/api/tilesets/1/'
