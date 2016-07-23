@@ -19,17 +19,12 @@ from mapproxy.wsgiapp import MapProxyApp
 from webtest import TestApp as TestApp_
 import yaml
 
+from .decorators import view_tileset_permissions
 from .models import Tileset
 from .helpers import get_status, generate_confs
 from .validator import validate_references, validate_options
 
-
 log = logging.getLogger('mapproxy.config')
-class IndexView(generic.ListView):
-    template_name = 'djmp/index.html'
-
-    def get_queryset(self):
-        return Tileset.objects.all()
 
 
 class DetailView(generic.DetailView):
@@ -38,12 +33,14 @@ class DetailView(generic.DetailView):
 
 
 @login_required
+@view_tileset_permissions
 def seed(request, pk):
     tileset = get_object_or_404(Tileset, pk=pk)
     return HttpResponse(json.dumps(tileset.seed()))
 
 
 @login_required
+@view_tileset_permissions
 def tileset_status(request, pk):
     tileset = get_object_or_404(Tileset, pk=pk)
     return HttpResponse(json.dumps(get_status(tileset)))
@@ -82,15 +79,12 @@ def get_mapproxy(tileset):
     return TestApp(app), mapproxy_cf
 
 
+@view_tileset_permissions
 def tileset_mapproxy(request, pk, path_info):
-    tileset = get_object_or_404(Tileset, pk=pk)
     # TODO(mvv): this could be handled as a decorator or some 
     #            other more generalizable pattern
-    allowed = request.user.has_perm('view_tileset', tileset)
-    if not allowed:
-        response = HttpResponse("forbidden", status=403)
-        return response
 
+    tileset = get_object_or_404(Tileset, pk=pk)
     mp, yaml_config = get_mapproxy(tileset)
 
     query = request.META['QUERY_STRING']
