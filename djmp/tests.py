@@ -1,16 +1,17 @@
 from django.test import TestCase
 from django.test.client import Client
+from django.test.utils import override_settings
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from guardian.management import create_anonymous_user
 from guardian.shortcuts import remove_perm
+import mock
 
 from .views import tileset_status, seed
 from .models import Tileset
 
 
 class DjmpTestBase(TestCase):
-
     fixtures = ['test_data.json']
 
     def setUp(self):
@@ -50,14 +51,6 @@ class DjmpTest(DjmpTestBase):
 class TilesetTestBase(DjmpTestBase):
     def setUp(self):
         super(TilesetTestBase, self).setUp()
-
-        # seed tile
-        resp = self.client.get(reverse('tileset_seed', args=(1,)))
-
-
-class TilesetAuthTest(TilesetTestBase):
-    def setUp(self):
-        super(TilesetAuthTest, self).setUp()
         self.testuser = User.objects.create_user(
             'testuser',
             'testuser@mvavnveen.net',
@@ -65,6 +58,10 @@ class TilesetAuthTest(TilesetTestBase):
         )
         self.testuser.save()
 
+
+class TilesetAuthTest(TilesetTestBase):
+    def setUp(self):
+        super(TilesetAuthTest, self).setUp()
         self.uri = reverse(
             'tileset_mapproxy',
             args=(1, u'/tms/1.0.0/streams/EPSG3857/1/0/0.png')
@@ -132,3 +129,82 @@ class TilesetAuthTestAPIView(TilesetAuthTest):
     def setUp(self):
         super(TilesetAuthTestAPIView, self).setUp()
         self.uri = '/api/tilesets/1/'
+
+
+@override_settings(ENABLE_GUARDIAN_PERMISSIONS=False)
+class TilesetAuthTestAPIDisabledSettingsView(TilesetAuthTest):
+    def setUp(self):
+        super(TilesetAuthTestAPIDisabledSettingsView, self).setUp()
+        self.uri = '/api/tilesets/1/'
+
+    def test_not_authorized_anonymous(self):
+        res = self.client.get(self.uri, **self.headers)
+        self.assertEqual(res.status_code, 200)
+
+    def test_authorized_admin(self):
+        self.client.login(username='admin', password='admin')
+        res = self.client.get(self.uri, **self.headers)
+        self.assertEqual(res.status_code, 200)
+
+    def test_not_authorized_remove_perm(self):
+        self.client.login(username='testuser', password='testuser')
+        res = self.client.get(self.uri, **self.headers)
+        self.assertEqual(res.status_code, 200)
+
+    def test_authorized_test_user_make_perm(self):
+        self.client.login(username='testuser', password='testuser')
+        res = self.client.get(self.uri, **self.headers)
+        self.assertEqual(res.status_code, 200)
+
+        tileset = Tileset.objects.get(pk=1)
+        tileset.add_read_perm(self.testuser)
+
+        self.client.login(username='testuser', password='testuser')
+        res = self.client.get(self.uri, **self.headers)
+        self.assertEqual(res.status_code, 200)
+
+        remove_perm('view_tileset', self.testuser, tileset)
+        self.client.login(username='testuser', password='testuser')
+        res = self.client.get(self.uri, **self.headers)
+        self.assertEqual(res.status_code, 200)
+
+
+@override_settings(ENABLE_GUARDIAN_PERMISSIONS=False)
+class TilesetAuthTestDetailDisabledSettingsView(TilesetAuthTest):
+    def setUp(self):
+        super(TilesetAuthTestDetailDisabledSettingsView, self).setUp()
+        self.uri = reverse(
+            'tileset_detail',
+            args=(1,)
+        )
+
+    def test_not_authorized_anonymous(self):
+        res = self.client.get(self.uri, **self.headers)
+        self.assertEqual(res.status_code, 200)
+
+    def test_authorized_admin(self):
+        self.client.login(username='admin', password='admin')
+        res = self.client.get(self.uri, **self.headers)
+        self.assertEqual(res.status_code, 200)
+
+    def test_not_authorized_remove_perm(self):
+        self.client.login(username='testuser', password='testuser')
+        res = self.client.get(self.uri, **self.headers)
+        self.assertEqual(res.status_code, 200)
+
+    def test_authorized_test_user_make_perm(self):
+        self.client.login(username='testuser', password='testuser')
+        res = self.client.get(self.uri, **self.headers)
+        self.assertEqual(res.status_code, 200)
+
+        tileset = Tileset.objects.get(pk=1)
+        tileset.add_read_perm(self.testuser)
+
+        self.client.login(username='testuser', password='testuser')
+        res = self.client.get(self.uri, **self.headers)
+        self.assertEqual(res.status_code, 200)
+
+        remove_perm('view_tileset', self.testuser, tileset)
+        self.client.login(username='testuser', password='testuser')
+        res = self.client.get(self.uri, **self.headers)
+        self.assertEqual(res.status_code, 200)

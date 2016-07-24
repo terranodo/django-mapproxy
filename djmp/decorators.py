@@ -4,11 +4,16 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 
 from .models import Tileset
+from django.conf import settings
 
 
 def view_tileset_permissions(view_func):
     def _wrapped_view(request, *args, **kwargs):
         tileset_pk = kwargs.get('pk')
+
+        # if permissions aren't enabled just pass through
+        if settings.ENABLE_GUARDIAN_PERMISSIONS == False:
+            return view_func(request, *args, **kwargs)
 
         if tileset_pk is None:
             raise ValueError('no tileset pk provided')

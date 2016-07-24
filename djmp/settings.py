@@ -1,4 +1,3 @@
-
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 
@@ -6,7 +5,8 @@ from django.conf import settings
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
-ENABLE_GUARDIAN_PERMISSIONS = False
+# enable/disable global object-level permissions for app
+ENABLE_GUARDIAN_PERMISSIONS = True
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'e#i*49t%&&=jbfs64hb8(fj(m8gqicz9h3+!3(y#(9k!uu#sd!'
