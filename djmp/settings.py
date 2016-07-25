@@ -1,6 +1,8 @@
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+import tempfile
+
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 
@@ -68,4 +70,5 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-FILE_CACHE_DIRECTORY = getattr('settings', 'FILE_CACHE_DIRECTORY', 'cache/layers')
+# Applying 12-factor app pattern
+FILE_CACHE_DIRECTORY = os.getenv('FILE_CACHE_DIRECTORY', tempfile.gettempdir())

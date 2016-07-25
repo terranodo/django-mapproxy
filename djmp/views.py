@@ -7,6 +7,7 @@ from django.core.urlresolvers import reverse
 from django.views import generic
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
+from django.conf import settings
 
 from mapproxy.config.config import load_default_config, load_config
 from mapproxy.util.ext.dictspec.validator import validate, ValidationError
@@ -18,7 +19,6 @@ from webtest import TestApp as TestApp_
 import os
 import yaml
 import logging
-import tempfile
 log = logging.getLogger('mapproxy.config')
 
 
@@ -152,7 +152,7 @@ def get_mapproxy(layer, seed=False, ignore_warnings=True, renderd=False):
                {
                    'type': 'file',
                    'directory_layout': 'tms',
-                   'directory': os.path.join(tempfile.gettempdir(),
+                   'directory': os.path.join(settings.FILE_CACHE_DIRECTORY,
                                              'mapproxy',
                                              'layer',
                                              '%s' % layer.id,
