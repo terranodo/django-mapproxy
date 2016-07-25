@@ -78,6 +78,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-FILE_CACHE_DIRECTORY = getattr(settings, 'FILE_CACHE_DIRECTORY', 'cache/layers')
+TILESET_CACHE_DIRECTORY = getattr(settings, 'TILESET_CACHE_DIRECTORY', os.path.join(BASE_DIR, 'cache/layers'))
+TILESET_CACHE_URL = getattr(settings, 'TILESET_CACHE_DIRECTORY', 'cache/layers')
 
 TASTYPIE_DEFAULT_FORMATS = ['json']
