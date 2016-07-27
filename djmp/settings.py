@@ -8,6 +8,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 # enable/disable global object-level permissions for app
 ENABLE_GUARDIAN_PERMISSIONS = True
 
+
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'e#i*49t%&&=jbfs64hb8(fj(m8gqicz9h3+!3(y#(9k!uu#sd!'
 
@@ -84,4 +85,4 @@ TILESET_CACHE_URL = getattr(settings, 'TILESET_CACHE_URL', 'cache/layers')
 
 TASTYPIE_DEFAULT_FORMATS = ['json']
 
-DJMP_AUTHORIZATION_CLASS = getattr(settings, 'DJMP_AUTHORIZATION_CLASS', 'tastypie.authorization.DjangoAuthorization')
+DJMP_AUTHORIZATION_CLASS = 'djmp.guardian_auth.GuardianAuthorization'
