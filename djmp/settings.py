@@ -5,7 +5,7 @@ from django.conf import settings
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
-# enable/disable global object-level permissions for app
+# Enable/disable global object-level permissions for app
 ENABLE_GUARDIAN_PERMISSIONS = True
 
 
