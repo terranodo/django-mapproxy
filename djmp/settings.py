@@ -83,3 +83,5 @@ TILESET_CACHE_DIRECTORY = getattr(settings, 'TILESET_CACHE_DIRECTORY', os.path.j
 TILESET_CACHE_URL = getattr(settings, 'TILESET_CACHE_URL', 'cache/layers')
 
 TASTYPIE_DEFAULT_FORMATS = ['json']
+
+DJMP_AUTHORIZATION_CLASS = getattr(settings, 'DJMP_AUTHORIZATION_CLASS', 'tastypie.authorization.DjangoAuthorization')

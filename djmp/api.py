@@ -1,9 +1,14 @@
+import importlib
+
 from tastypie.constants import ALL, ALL_WITH_RELATIONS
 from tastypie.resources import ModelResource
-from tastypie.authorization import DjangoAuthorization
 
-from .guardian_auth import GuardianAuthorization
 from .models import Tileset
+
+from .settings import DJMP_AUTHORIZATION_CLASS
+
+module_name, class_name = DJMP_AUTHORIZATION_CLASS.rsplit(".", 1)
+auth_class = getattr(importlib.import_module(module_name), class_name)
 
 
 class TilesetResource(ModelResource):
@@ -13,5 +18,5 @@ class TilesetResource(ModelResource):
         queryset = Tileset.objects.all()
         allowed_methods = ['get', 'post', 'put', 'delete']
         resource_name = 'tilesets'
-        authorization = GuardianAuthorization()
+        authorization = auth_class()
         always_return_data = True
