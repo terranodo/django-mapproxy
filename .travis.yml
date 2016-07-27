@@ -14,8 +14,8 @@ install:
   - pip install pep8 pyflakes
   # install the app itself
   - pip install -q -e .
-before_script:
-  - "pep8 --exclude=migrations --ignore=E501,E225 src"
-  - pyflakes -x W src
+#before_script:
+#  - "pep8 --exclude=migrations --ignore=E501,E225 src"
+#  - pyflakes -x W src
 script:
   - python manage.py test
