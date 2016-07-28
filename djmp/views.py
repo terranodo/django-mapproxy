@@ -19,6 +19,7 @@ from webtest import TestApp as TestApp_
 import os
 import yaml
 import logging
+import tempfile
 log = logging.getLogger('mapproxy.config')
 
 
@@ -146,13 +147,14 @@ def get_mapproxy(layer, seed=False, ignore_warnings=True, renderd=False):
              }
 
     # A cache that does not store for now. It needs a grid and a source.
+    cache_directory = getattr(settings, 'FILE_CACHE_DIRECTORY', tempfile.gettempdir())
     caches = {'default_cache':
               {
                'cache':
                {
                    'type': 'file',
                    'directory_layout': 'tms',
-                   'directory': os.path.join(settings.FILE_CACHE_DIRECTORY,
+                   'directory': os.path.join(cache_directory,
                                              'mapproxy',
                                              'layer',
                                              '%s' % layer.id,
