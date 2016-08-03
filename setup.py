@@ -6,7 +6,7 @@ def read(*rnames):
 
 setup(
     name="djmp",
-    version="0.1",
+    version="0.2",
     author="",
     author_email="",
     description="django-mapproxy adaptor",
