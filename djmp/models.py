@@ -57,7 +57,7 @@ class Tileset(models.Model):
     cache_type = models.CharField(max_length=10, choices=CACHE_TYPES)
     # file cache params
     directory_layout = models.CharField(max_length=20, choices=DIR_LAYOUTS, blank=True, null=True)
-    directory = models.CharField(max_length=256, default=MAPPROXY_CACHE_DIRECTORY, blank=True, null=True)
+    directory = models.CharField(max_length=256, default=MAPPROXY_CACHE_DIR, blank=True, null=True)
     # gpkg cache params
     filename = models.CharField(max_length=256, blank=True, null=True)
     table_name = models.CharField(max_length=128, blank=True, null=True)
