@@ -19,11 +19,10 @@ from webtest import TestApp as TestApp_
 import os
 import yaml
 import logging
-import tempfile
 log = logging.getLogger('mapproxy.config')
 
 
-from .models import Tileset
+from .models import Tileset, MAPPROXY_CACHE_DIR
 from .helpers import get_status
 from .validator import validate_references, validate_options
 
@@ -147,7 +146,6 @@ def get_mapproxy(layer, seed=False, ignore_warnings=True, renderd=False):
              }
 
     # A cache that does not store for now. It needs a grid and a source.
-    cache_directory = getattr(settings, 'FILE_CACHE_DIRECTORY', tempfile.gettempdir())
     caches = {'default_cache':
               {
                'cache':

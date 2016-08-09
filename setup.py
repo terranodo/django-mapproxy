@@ -6,11 +6,11 @@ def read(*rnames):
 
 setup(
     name="djmp",
-    version="0.2",
+    version="0.2.1",
     author="",
     author_email="",
     description="django-mapproxy adaptor",
-    long_description=(read('README.md')),
+    long_description=('djmp'),
     # Full list of classifiers can be found at:
     # http://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
