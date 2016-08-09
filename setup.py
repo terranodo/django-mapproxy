@@ -6,7 +6,7 @@ def read(*rnames):
 
 setup(
     name="djmp",
-    version="0.2.5",
+    version="0.2.6",
     author="",
     author_email="",
     description="django-mapproxy adaptor",
@@ -23,12 +23,12 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[
-        'Django==1.8.7',
-        'MapProxy==1.9.0',
-        'PyYAML>=3.10',
-        'django-tastypie>=0.12.1',
-        'Shapely>=1.5.9',
-        'psutil>=3.0.1',
-        'pyproj==1.9.5.1',
+        'Django>=1.8.7',
+        'MapProxy>=1.9.0',
+        'PyYAML',
+        'django-tastypie',
+        'Shapely',
+        'psutil',
+        'pyproj',
     ]
 )
