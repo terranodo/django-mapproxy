@@ -152,7 +152,7 @@ def get_mapproxy(layer, seed=False, ignore_warnings=True, renderd=False):
                {
                    'type': 'file',
                    'directory_layout': 'tms',
-                   'directory': os.path.join(cache_directory,
+                   'directory': os.path.join(MAPPROXY_CACHE_DIR,
                                              'mapproxy',
                                              'layer',
                                              '%s' % layer.id,
