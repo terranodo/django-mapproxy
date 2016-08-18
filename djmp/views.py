@@ -107,6 +107,9 @@ def tileset_mapproxy(request, pk, path_info):
     # Get a response from MapProxy as if it was running standalone.
     mp_response = mp.get(path_info, params, headers)
 
+    if mp_response.status_code == 500:
+        raise Exception('map proxy exception occurred: %s' % (mp_response,))
+
     # Create a Django response from the MapProxy WSGI response.
     response = HttpResponse(mp_response.body, status=mp_response.status_int)
     for header, value in mp_response.headers.iteritems():
