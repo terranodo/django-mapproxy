@@ -59,6 +59,7 @@ class TilesetTestBase(DjmpTestBase):
         self.testuser.save()
 
 
+@override_settings(ENABLE_GUARDIAN_PERMISSIONS=True)
 class TilesetAuthTest(TilesetTestBase):
     def setUp(self):
         super(TilesetAuthTest, self).setUp()

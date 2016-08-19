@@ -6,7 +6,7 @@ from django.conf import settings
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 # Enable/disable global object-level permissions for app
-ENABLE_GUARDIAN_PERMISSIONS = True
+ENABLE_GUARDIAN_PERMISSIONS = False
 
 
 # SECURITY WARNING: keep the secret key used in production secret!
