@@ -6,6 +6,7 @@ from tastypie.exceptions import TastypieError, ImmediateHttpResponse
 from tastypie.http import HttpForbidden
 
 from django.conf import settings
+from .settings import ENABLE_GUARDIAN_PERMISSIONS
 
 
 class GuardianAuthorization(Authorization):
@@ -31,7 +32,7 @@ class GuardianAuthorization(Authorization):
 
     def read_list(self, object_list, bundle):
         # if permissions aren't enabled just pass through
-        if settings.ENABLE_GUARDIAN_PERMISSIONS == False:
+        if ENABLE_GUARDIAN_PERMISSIONS == False:
             return True
 
         klass = self.base_checks(bundle.request, object_list.model)
@@ -54,7 +55,7 @@ class GuardianAuthorization(Authorization):
 
     def read_detail(self, object_list, bundle):
         # if permissions aren't enabled just pass through
-        if settings.ENABLE_GUARDIAN_PERMISSIONS == False:
+        if ENABLE_GUARDIAN_PERMISSIONS == False:
             return True
 
     	klass = self.base_checks(bundle.request, bundle.obj.__class__)
@@ -79,7 +80,7 @@ class GuardianAuthorization(Authorization):
 
     def create_list(self, object_list, bundle):
         # if permissions aren't enabled just pass through
-        if settings.ENABLE_GUARDIAN_PERMISSIONS == False:
+        if ENABLE_GUARDIAN_PERMISSIONS == False:
             return True
 
     	klass = self.base_checks(bundle.request, object_list.model)
@@ -102,7 +103,7 @@ class GuardianAuthorization(Authorization):
 
     def create_detail(self, object_list, bundle):
         # if permissions aren't enabled just pass through
-        if settings.ENABLE_GUARDIAN_PERMISSIONS == False:
+        if ENABLE_GUARDIAN_PERMISSIONS == False:
             return True
 
     	klass = self.base_checks(bundle.request, bundle.obj.__class__)
@@ -128,7 +129,7 @@ class GuardianAuthorization(Authorization):
     
     def update_list(self, object_list, bundle):
         # if permissions aren't enabled just pass through
-        if settings.ENABLE_GUARDIAN_PERMISSIONS == False:
+        if ENABLE_GUARDIAN_PERMISSIONS == False:
             return True
 
     	klass = self.base_checks(bundle.request, object_list.model)
@@ -151,7 +152,7 @@ class GuardianAuthorization(Authorization):
     
     def update_detail(self, object_list, bundle):
         # if permissions aren't enabled just pass through
-        if settings.ENABLE_GUARDIAN_PERMISSIONS == False:
+        if ENABLE_GUARDIAN_PERMISSIONS == False:
             return True
 
     	update_list=[]
@@ -176,7 +177,7 @@ class GuardianAuthorization(Authorization):
     
     def delete_list(self, object_list, bundle):
         # if permissions aren't enabled just pass through
-        if settings.ENABLE_GUARDIAN_PERMISSIONS == False:
+        if ENABLE_GUARDIAN_PERMISSIONS == False:
             return True
 
     	delete_list = []
@@ -199,7 +200,7 @@ class GuardianAuthorization(Authorization):
     
     def delete_detail(self, object_list, bundle):
         # if permissions aren't enabled just pass through
-        if settings.ENABLE_GUARDIAN_PERMISSIONS == False:
+        if ENABLE_GUARDIAN_PERMISSIONS == False:
             return True
 
     	delete_list = []

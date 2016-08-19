@@ -3,10 +3,11 @@ import helpers
 from pyproj import Proj, transform
 
 from django.db import models
-from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from guardian.shortcuts import assign_perm
 from mapproxy.seed.config import SeedConfigurationError, ConfigurationError
+
+from .settings import TILESET_CACHE_DIRECTORY
 
 log = logging.getLogger('djmapproxy')
 
@@ -56,7 +57,7 @@ class Tileset(models.Model):
     cache_type = models.CharField(max_length=10, choices=CACHE_TYPES)
     # file cache params
     directory_layout = models.CharField(max_length=20, choices=DIR_LAYOUTS, blank=True, null=True)
-    directory = models.CharField(max_length=256, default=settings.TILESET_CACHE_DIRECTORY, blank=True, null=True)
+    directory = models.CharField(max_length=256, default=TILESET_CACHE_DIRECTORY, blank=True, null=True)
     # gpkg cache params
     filename = models.CharField(max_length=256, blank=True, null=True)
     table_name = models.CharField(max_length=128, blank=True, null=True)
