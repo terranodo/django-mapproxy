@@ -5,7 +5,6 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from guardian.management import create_anonymous_user
 from guardian.shortcuts import remove_perm
-import mock
 
 from .views import tileset_status, seed
 from .models import Tileset
@@ -60,6 +59,7 @@ class TilesetTestBase(DjmpTestBase):
 
 
 @override_settings(ENABLE_GUARDIAN_PERMISSIONS=True)
+@override_settings(DJMP_AUTHORIZATION_CLASS='djmp.guardian_auth.GuardianAuthorization')
 class TilesetAuthTest(TilesetTestBase):
     def setUp(self):
         super(TilesetAuthTest, self).setUp()
