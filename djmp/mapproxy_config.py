@@ -98,7 +98,8 @@ services_conf = {
 grids_conf = {
     "EPSG3857": {
         "origin": "nw",
-        "srs": "EPSG:3857"
+        "srs": "EPSG:3857",
+        "num_levels": 30
     }
 }
 
