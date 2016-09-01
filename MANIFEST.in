@@ -1,1 +1,2 @@
 include requirements.txt
+recursive-include djmp *.js *.css *.png *.eot *.woff *.tff *.svg *.html *.xml *.json
