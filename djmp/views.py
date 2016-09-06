@@ -103,7 +103,7 @@ def get_mapproxy(layer, seed=False, ignore_warnings=True, renderd=False):
               'supported_srs': ['EPSG:4326', 'EPSG:900913', 'EPSG:3857'],
               },
              'req': {
-                'layers': layer_name,
+                'layers': layer.name,
                 'url': url,
                 'transparent': True,
               },
