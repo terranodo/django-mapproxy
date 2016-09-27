@@ -13,7 +13,7 @@ seed_action.short_description = "Seed selected Tilesets"
 
 class TilesetAdmin(GuardedModelAdmin):
     readonly_fields = ('size', 'layer_uuid',)
-    list_display = ('name', 'layer_name', 'server_url', 'created_by', 'created_at')
+    list_display = ('id', 'name', 'layer_name', 'server_url', 'created_by', 'created_at')
     search_fields = ['name']
     actions = [seed_action]
 
