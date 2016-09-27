@@ -131,7 +131,7 @@ class Tileset(models.Model):
         return [sw[0], sw[1], ne[0], ne[1]]
 
     def bbox(self):
-        return [self.bbox_x0, self.bbox_y0, self.bbox_x1, self.bbox_y1]
+        return [float(self.bbox_x0), float(self.bbox_y0), float(self.bbox_x1), float(self.bbox_y1)]
 
     def add_read_perm(self, user_or_group):
         return assign_perm('view_tileset', user_or_group, self)
