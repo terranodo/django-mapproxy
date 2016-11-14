@@ -77,8 +77,9 @@ def get_mapproxy(layer, seed=False, ignore_warnings=True, renderd=False):
     """Creates a mapproxy config for a given layer-like object.
        Compatible with django-registry and GeoNode.
     """
-    bbox = [float(layer.bbox_x0), float(layer.bbox_y0), float(layer.bbox_x1), float(layer.bbox_y1)]
-
+    bbox = float(layer.bbox_x0), float(layer.bbox_y0), float(layer.bbox_x1), float(layer.bbox_y1)
+    # MapProxy does not like tuples, it prefers a comma separated string.
+    bbox = ",".join([format(x, '.4f') for x in bbox])
     url = str(layer.service.url)
 
     layer_name = simple_name(layer.name)
@@ -87,9 +88,9 @@ def get_mapproxy(layer, seed=False, ignore_warnings=True, renderd=False):
     bbox_srs = 'EPSG:4326'
     grid_srs = 'EPSG:3857'
 
-    if layer.type == 'WARPER':
+    if layer.type == 'Hypermap:WARPER':
         url = str(layer.url.replace("maps//wms", "maps/wms"))
-        grid_srs = 'EPSG:900913'
+        grid_srs = 'EPSG:4326'
 
     if layer.type == 'WM':
         url = str(layer.url.replace("maps//wms", "maps/wms"))
@@ -120,7 +121,7 @@ def get_mapproxy(layer, seed=False, ignore_warnings=True, renderd=False):
         url = url.replace("arcx/rest/services", "arcx/services")
 
         srs = 'EPSG:3857'
-        bbox_srs = 'EPSG:3857'
+        bbox_srs = 'EPSG:4326'
 
         default_source = {
                   'type': 'arcgis',
@@ -183,6 +184,8 @@ def get_mapproxy(layer, seed=False, ignore_warnings=True, renderd=False):
               'md': {'abstract': 'This is the Harvard HyperMap Proxy.',
                      'title': 'Harvard HyperMap Proxy'},
               'srs': ['EPSG:4326', 'EPSG:3857'],
+              'srs_bbox': 'EPSG:4326',
+              'bbox': bbox,
               'versions': ['1.1.1']},
       'wmts': {
               'restful': True,
