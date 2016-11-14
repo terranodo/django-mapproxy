@@ -171,7 +171,7 @@ def get_mapproxy(layer, seed=False, ignore_warnings=True, renderd=False):
     layers = [
         {'name': layer_name,
          'sources': ['default_cache'],
-         'title': str(layer.title),
+         'title': "%s" % layer.title,
          },
     ]
 
