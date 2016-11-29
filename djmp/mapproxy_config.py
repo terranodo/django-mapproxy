@@ -20,7 +20,8 @@ def wms_source(tileset):
             "layers": u_to_str(tileset.layer_name),
             "transparent": True
         },
-        "http": http
+        "http": http,
+        'coverage': get_coverage(tileset)
     }
 
 def mapnik_source(tileset):
@@ -29,10 +30,8 @@ def mapnik_source(tileset):
         "mapfile": tileset.mapfile.path,
         "layers": [u_to_str(tileset.name)],
         "transparent": True,
-        "coverage": {
-            "bbox": tileset.bbox_3857(),
-            "srs": 'EPSG:3857'
-        }
+        "coverage": get_coverage(tileset)
+
     }
 
 def tile_source(tileset):
@@ -55,7 +54,7 @@ def gpkg_cache(tileset):
         "table_name": tileset.table_name
     }
 
-def seed_coverage(tileset):
+def get_coverage(tileset):
     return {
         "bbox": tileset.bbox_3857(),
         "srs": "EPSG:3857"
@@ -100,8 +99,7 @@ def grids_conf(tileset):
         "EPSG3857": {
             "origin": "nw",
             "srs": "EPSG:3857",
-            "num_levels": 30,
-            "bbox": tileset.bbox_3857()
+            "num_levels": 30
         },
         "EPSG4326": {
             "origin": "nw",
@@ -160,7 +158,7 @@ def get_seed_conf(tileset):
 
     seed_conf = {
         'coverages': {
-            "tileset_geom": seed_coverage(tileset)
+            "tileset_geom": get_coverage(tileset)
         },
         'seeds': {
             "tileset_seed": seed_seeds(tileset)
