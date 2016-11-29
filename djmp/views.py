@@ -90,7 +90,8 @@ def get_mapproxy(layer, seed=False, ignore_warnings=True, renderd=False):
 
     if layer.type == 'Hypermap:WARPER':
         url = str(layer.url.replace("maps//wms", "maps/wms"))
-        grid_srs = 'EPSG:4326'
+        grid_srs = 'EPSG:3857'
+        srs = 'EPSG:90013'
 
     if layer.type == 'WM':
         url = str(layer.url.replace("maps//wms", "maps/wms"))
@@ -156,7 +157,7 @@ def get_mapproxy(layer, seed=False, ignore_warnings=True, renderd=False):
                    'directory': os.path.join(MAPPROXY_CACHE_DIR,
                                              'mapproxy',
                                              'layer',
-                                             '%s' % layer.id,
+                                             '%s' % layer.uuid,
                                              'map',
                                              'wmts',
                                              layer_name,
@@ -181,8 +182,8 @@ def get_mapproxy(layer, seed=False, ignore_warnings=True, renderd=False):
     # Demo is used to test our installation, may be disabled in final version
     services = {
       'wms': {'image_formats': ['image/png'],
-              'md': {'abstract': 'This is the Harvard HyperMap Proxy.',
-                     'title': 'Harvard HyperMap Proxy'},
+              'md': {'abstract': '%s' % layer.abstract,
+                     'title': '%s' % layer.title},
               'srs': ['EPSG:4326', 'EPSG:3857'],
               'srs_bbox': 'EPSG:4326',
               'bbox': bbox,
