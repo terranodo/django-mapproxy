@@ -90,7 +90,7 @@ def get_mapproxy(layer, seed=False, ignore_warnings=True, renderd=False):
 
     if layer.type == 'Hypermap:WARPER':
         url = str(layer.url.replace("maps//wms", "maps/wms"))
-        grid_srs = 'EPSG:3857'
+        grid_srs = 'EPSG:900913'
         srs = 'EPSG:90013'
 
     if layer.type == 'WM':
