@@ -94,7 +94,7 @@ services_conf = {
     'demo': None
 }
 
-def grids_conf(tileset):
+def grids_conf():
     return {
         "EPSG3857": {
             "origin": "nw",
@@ -104,8 +104,7 @@ def grids_conf(tileset):
         "EPSG4326": {
             "origin": "nw",
             "srs": "EPSG:4326",
-            "num_levels": 30,
-            "bbox": tileset.bbox()
+            "num_levels": 30
         }
     }
 
@@ -145,7 +144,7 @@ def get_mapproxy_conf(tileset):
         'sources': {
             'tileset_source': sources_conf.get(tileset.source_type)(tileset)
         },  
-        'grids': grids_conf(tileset),
+        'grids': grids_conf(),
         'globals': {
             "image": {
                 "paletted": False
