@@ -45,7 +45,7 @@ for dirpath, dirnames, filenames in os.walk(geonode_dir):
 
 setup(
     name="djmp",
-    version="0.1",
+    version="0.1.1",
     author="",
     author_email="",
     description="django-mapproxy adaptor",
@@ -58,7 +58,7 @@ setup(
     license="BSD",
     keywords="django mapproxy",
     url='https://github.com/terranodo/django-mapproxy',
-    packages=['djmp',],
+    packages=['djmp', 'djmp.migrations'],
     include_package_data=True,
     data_files=data_files,
     zip_safe=False,
