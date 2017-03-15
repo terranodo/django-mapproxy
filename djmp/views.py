@@ -81,20 +81,15 @@ def get_mapproxy(tileset):
 
 @view_tileset_permissions
 def tileset_mapproxy(request, pk, path_info):
-    # TODO(mvv): this could be handled as a decorator or some 
+    # TODO(mvv): this could be handled as a decorator or some
     #            other more generalizable pattern
 
     tileset = get_object_or_404(Tileset, pk=pk)
     mp, yaml_config = get_mapproxy(tileset)
 
-    query = request.META['QUERY_STRING']
-
-    if len(query) > 0:
-        path_info = path_info + '?' + query
-
     params = {}
     headers = {
-       'X-Script-Name': str(request.get_full_path()),
+       'X-Script-Name': str(request.path_info.replace(path_info, '')),
        'X-Forwarded-Host': request.META['HTTP_HOST'],
        'HTTP_HOST': request.META['HTTP_HOST'],
        'SERVER_NAME': request.META['SERVER_NAME'],
@@ -103,6 +98,11 @@ def tileset_mapproxy(request, pk, path_info):
     if path_info == '/config':
         response = HttpResponse(yaml_config, content_type='text/plain')
         return response
+
+    query = request.META['QUERY_STRING']
+
+    if len(query) > 0:
+        path_info = path_info + '?' + query
 
     # Get a response from MapProxy as if it was running standalone.
     mp_response = mp.get(path_info, params, headers)
