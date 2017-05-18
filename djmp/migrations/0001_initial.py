@@ -31,7 +31,7 @@ class Migration(migrations.Migration):
                 ('bbox_y1', models.DecimalField(default=89.9, max_digits=19, decimal_places=15, validators=[django.core.validators.MinValueValidator(-89.9), django.core.validators.MaxValueValidator(89.9)])),
                 ('cache_type', models.CharField(max_length=10, choices=[[b'file', b'file'], [b'geopackage', b'geopackage']])),
                 ('directory_layout', models.CharField(blank=True, max_length=20, null=True, choices=[[b'tms', b'tms'], [b'tc', b'TileCache']])),
-                ('directory', models.CharField(default=b'/Users/ortelius/projects/nga-dev/django-mapproxy/cache/layers', max_length=256, null=True, blank=True)),
+                ('directory', models.CharField(default=b'cache/layers', max_length=256, null=True, blank=True)),
                 ('filename', models.CharField(max_length=256, null=True, blank=True)),
                 ('table_name', models.CharField(max_length=128, null=True, blank=True)),
                 ('mapfile', models.FileField(null=True, upload_to=b'mapfiles', blank=True)),
