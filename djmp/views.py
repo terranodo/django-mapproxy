@@ -133,6 +133,14 @@ def get_mapproxy(layer, seed=False, ignore_warnings=True, renderd=False):
                   },
         }
 
+    if layer.type == 'OGC:WMTS':
+        url += "?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=%s" % layer_name
+        url += "&TILEMATRIXSET=WEBMERCATOR&TILEMATRIX=%(z)s&TILEROW=%(y)s&TILECOL=%(x)s&FORMAT=image%%2Fpng"
+        default_source['type'] = 'tile'
+        default_source['grid'] = 'GLOBAL_WEBMERCATOR'
+        del default_source['req']['url']
+        default_source['url'] = url
+
     # A source is the WMS config
     sources = {
       'default_source': default_source
