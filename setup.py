@@ -63,7 +63,7 @@ setup(
     data_files=data_files,
     zip_safe=False,
     install_requires=[
-        'Django==1.8.7',
+        'Django==1.11.23',
         'MapProxy==1.9.0',
         'PyYAML>=3.10',
         'django-tastypie==0.13.3',
